@@ -14,7 +14,7 @@ const count = ref(0)
   </button>
 </template>
 
-<!-- Preview part -->
+<!-- Preview part
 
 <preview lang="md">
   # This is preview page of HelloWorld.vue
@@ -43,4 +43,4 @@ const count = ref(0)
     background-color: green;
   }
   </style>
-</preview>
+</preview> -->
