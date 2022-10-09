@@ -1,104 +1,192 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
-import { GoogleMap, Marker } from 'vue3-google-map'
-import { haversine_distance } from '~/utils/distance'
+import { GoogleMap, Marker, InfoWindow } from 'vue3-google-map'
+import { toLatLngLiteral } from '~/utils/geolocation'
+import styles from './style'
 
-const center: Ref<google.maps.LatLngLiteral> = ref({ lat: 19.43302471023951, lng: -99.13224809885025 })
+const center = ref<google.maps.LatLngLiteral>({
+  lat: 19.43302471023951,
+  lng: -99.13224809885025,
+})
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-const gmaps = (ref(null) as unknown) as google.maps.Map
-const currentPosition: Ref<GeolocationPosition> = ref({}) as unknown as Ref<GeolocationPosition>
-const locations: Ref<GeolocationPosition[]> = ref([])
-const remoteLocation = ref(center.value)
-const distanceCalculated = ref(0)
-const distanceAPI = ref(0)
+// const gmaps = ref<google.maps.Map>()
+const gmaps = ref<InstanceType<typeof GoogleMap>>()
+const currentPosition = ref<GeolocationPosition>()
 let distanceService: google.maps.DistanceMatrixService
 
-// const remoteMarker = ref(null) as unknown as Ref<{ marker: google.maps.Marker }>
-const remoteMarker = ref<{ marker: google.maps.Marker }>() as unknown as Ref<{ marker: google.maps.Marker }>
+let directionsServices: google.maps.DirectionsService
+let directionsRenderer: google.maps.DirectionsRenderer
+
+const distanceAPI = ref(0)
+let atmLocations = ref<any[]>([])
+
+const infoWindow = ref<InstanceType<typeof InfoWindow>>()
 
 const positionCallback = (position: GeolocationPosition) => {
-  const geoPosition = {
-    lat: position.coords.latitude,
-    lng: position.coords.longitude,
-  }
-
-  // center.value = geoPosition
   currentPosition.value = position
-  remoteLocation.value = { lat: geoPosition.lat + 0.005, lng: geoPosition.lng + 0.005 }
-  locations.value.push(position)
-  // gmaps.setCenter(center.value)
-  console.log('location has changed')
-}
 
-const calculateDistance = () => {
-  // remoteMarker.value.
-  console.log(`remote marker position: ${remoteMarker.value.marker.getPosition()}`)
-  distanceCalculated.value = haversine_distance(new google.maps.LatLng(center.value), remoteMarker.value.marker.getPosition()!)
-  distanceService.getDistanceMatrix({
-    origins: [center.value],
-    destinations: [remoteMarker.value.marker.getPosition()!],
-    travelMode: google.maps.TravelMode.WALKING,
-    unitSystem: google.maps.UnitSystem.METRIC,
-  }, (response, status) => {
-    console.debug(response)
-    distanceAPI.value = response?.rows[0].elements[0].distance.value || 0
-  })
+  center.value = toLatLngLiteral(currentPosition.value)
+
+  console.log('location has changed')
 }
 
 const getLocation = () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       positionCallback,
-      error => alert(error),
+      (error) => alert(error),
       {
         enableHighAccuracy: true,
-      },
+      }
     )
   }
-  // else {
-  //   alert('no geolocation')
-  // }
+}
+
+const getNearATMs = async (position: google.maps.LatLngLiteral) => {
+  const now = new Date()
+
+  const bodyParams = {
+    metodo: 'getPuntos',
+    latitud: position.lat,
+    longitud: position.lng,
+    idOpcionCatalogo: 11,
+    idOpcionAtributo: 14,
+    dia: now.getDay(),
+    hora: '0:0',
+    ubicacion: 1,
+    direccion: 0,
+    // fecha: now.toString(),
+  }
+
+  const formBody = []
+  for (var property in bodyParams) {
+    var encodedKey = encodeURIComponent(property)
+    var encodedValue = encodeURIComponent(bodyParams[property])
+    formBody.push(encodedKey + '=' + encodedValue)
+  }
+
+  try {
+    const apiResponse = await fetch(
+      'https://www.strategis.mx/Glocator/common/services/Buscador.ashx',
+      {
+        body: formBody.join('&'),
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+      }
+    )
+
+    const { Obj: data } = await apiResponse.json()
+    console.log(data)
+
+    const bounds = new google.maps.LatLngBounds()
+
+    atmLocations.value = data.map((val: any) => {
+      const latlng = {
+        lat: parseFloat(val.Latitud),
+        lng: parseFloat(val.Longitud),
+      } as google.maps.LatLngLiteral
+
+      bounds.extend(latlng)
+
+      return {
+        ...val,
+        latlng,
+      }
+    })
+
+    console.log(atmLocations.value)
+
+    gmaps.value?.map?.fitBounds(bounds)
+    gmaps.value?.map?.panToBounds(bounds)
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getRoute = async () => {
+  await directionsServices.route(
+    {
+      origin: center.value,
+      destination: atmLocations.value[0].latlng,
+      travelMode: google.maps.TravelMode.DRIVING,
+      unitSystem: google.maps.UnitSystem.METRIC,
+    },
+    function (result, status) {
+      if (status == 'OK') {
+        directionsRenderer.setDirections(result)
+      }
+    }
+  )
+}
+
+const setMarkerInfo = (location: any) => {
+  infoWindow.value?.infoWindow?.setContent(
+    `${Math.round(location.Distancia)} metros`
+  )
+  infoWindow.value?.infoWindow?.setPosition(location.latlng)
+  infoWindow.value?.infoWindow?.open(gmaps.value?.map)
 }
 
 onMounted(() => {
-  distanceService = new google.maps.DistanceMatrixService()
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
       positionCallback,
-      error => alert(error),
+      (error) => alert(error),
       {
         enableHighAccuracy: true,
-      },
+      }
     )
   }
-  // else {
-  //   alert('no geolocation')
-  // }
 })
+
+watch(
+  () => gmaps.value?.ready,
+  (ready) => {
+    if (ready) {
+      console.log(google.maps)
+      directionsServices = new google.maps.DirectionsService()
+      directionsRenderer = new google.maps.DirectionsRenderer()
+      directionsRenderer.setMap(gmaps.value?.map || null)
+      distanceService = new google.maps.DistanceMatrixService()
+
+      // infoWindow.value?.infoWindow?.bindTo
+    }
+  }
+)
 </script>
 
 <template>
-  <GoogleMap ref="gmaps" :api-key="API_KEY" style="width: 100%; height: 500px" :center="center" :zoom="15">
-    <Marker :options="{ position: center }" />
-    <Marker ref="remoteMarker" :options="{ position: remoteLocation, draggable: true }" />
+  <GoogleMap
+    ref="gmaps"
+    :api-key="API_KEY"
+    style="width: 100%; height: 800px"
+    :center="center"
+    :zoom="15"
+    :styles="styles"
+    language="es-MX"
+  >
+    <!-- @load="onMapsLoaded" -->
+    <Marker
+      :options="{
+        position: center,
+        // icon: 'https\:\/\/developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+      }"
+    />
+    <Marker
+      v-for="(location, index) in atmLocations"
+      :key="index"
+      :options="{ position: location.latlng }"
+    >
+      <!-- @mouseover="setMarkerInfo(location)" -->
+      <InfoWindow ref="infoWindow">
+        {{ Math.round(location.Distancia) }} metros
+      </InfoWindow>
+    </Marker>
   </GoogleMap>
-  <div class="btn" @click="getLocation">
-    Get current location
-  </div>
-  <div class="btn" @click="calculateDistance">
-    Calculate distance
-  </div>
-  <div class="text-dark-50">
-    Distance calculated: {{ distanceCalculated }}
-    <br>
-    Distance google service: {{ distanceAPI }}
-  </div>
-  <ul>
-    <li v-for="location in locations" :key="location.timestamp">
-      Location Lat: {{ location.coords.latitude }}, Long: {{ location.coords.longitude }}
-      Heading: {{ location.coords.heading }}
-      timestamp: {{ location.timestamp }}
-    </li>
-  </ul>
+  <div class="btn" @click="getLocation">Actualizar ubicación</div>
+  <div class="btn" @click="getNearATMs(center)">Cajeros cercanos</div>
+  <div class="btn" @click="getRoute()">Mostrar ruta</div>
+  <!-- <div class="btn" @click="calculateDistance">Calculate distance</div> -->
 </template>
-
