@@ -51,6 +51,11 @@ export default defineConfig({
         'src/store',
       ],
       vueTemplate: true,
+      eslintrc: {
+        enabled: true, // Default `false`
+        filepath: './.eslintrc-auto-import.json', // Default `./.eslintrc-auto-import.json`
+        globalsPropValue: true, // Default `true`, (true | false | 'readonly' | 'readable' | 'writable' | 'writeable')
+      },
     }),
 
     // https://github.com/antfu/unplugin-vue-components
@@ -94,8 +99,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'safari-pinned-tab.svg'],
       manifest: {
-        name: 'Vitesse',
-        short_name: 'Vitesse',
+        name: 'ATM Explorer',
+        short_name: 'ATM',
         theme_color: '#ffffff',
         icons: [
           {
