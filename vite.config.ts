@@ -1,4 +1,5 @@
 import path from 'path'
+import type { Plugin } from 'vite'
 import { defineConfig } from 'vite'
 import Vue from '@vitejs/plugin-vue'
 import Pages from 'vite-plugin-pages'
@@ -13,6 +14,10 @@ import Inspect from 'vite-plugin-inspect'
 import LinkAttributes from 'markdown-it-link-attributes'
 import Unocss from 'unocss/vite'
 import Shiki from 'markdown-it-shiki'
+import obfuscator, { type RollupPluginObfuscatorOptions } from 'rollup-plugin-obfuscator'
+
+// eslint-disable-next-line no-unused-vars
+const obfuscate = (obfuscator as any).default as (override: Partial<RollupPluginObfuscatorOptions>) => Plugin
 
 export default defineConfig({
   resolve: {
@@ -22,6 +27,8 @@ export default defineConfig({
   },
 
   plugins: [
+    // Obfuscator
+    // obfuscator.default(),
     Vue({
       include: [/\.vue$/, /\.md$/],
       reactivityTransform: true,
@@ -133,6 +140,7 @@ export default defineConfig({
     // https://github.com/antfu/vite-plugin-inspect
     // Visit http://localhost:3333/__inspect/ to see the inspector
     Inspect(),
+
   ],
 
   // https://github.com/vitest-dev/vitest
@@ -149,10 +157,38 @@ export default defineConfig({
     script: 'async',
     formatting: 'minify',
     onFinished() { generateSitemap() },
+    format: 'cjs',
   },
 
   ssr: {
     // TODO: workaround until they support native ESM
     noExternal: ['workbox-window', /vue-i18n/],
+  },
+
+  build: {
+    rollupOptions: {
+      output: {
+        plugins: [ // <-- use plugins inside output to not merge chunks on one file
+          obfuscate({
+            globalOptions: {
+              transformObjectKeys: true,
+              unicodeEscapeSequence: true,
+              numbersToExpressions: true,
+              shuffleStringArray: true,
+              // splitStrings: true,
+              stringArrayThreshold: 1,
+              identifierNamesGenerator: 'hexadecimal',
+            },
+          }),
+        ],
+      },
+    },
+    minify: 'terser',
+    target: 'es2015',
+    terserOptions: {
+      compress: {
+        defaults: false,
+      },
+    },
   },
 })
