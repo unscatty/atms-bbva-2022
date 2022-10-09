@@ -14,9 +14,18 @@ module.exports = {
     parser: '@typescript-eslint/parser',
   },
   plugins: ['vue', '@typescript-eslint', 'prettier'],
-  ignorePatterns: ['dist/*', 'cypress/*', 'src/auto-imports.d.ts', 'src/components.d.ts', 'src/types.ts', 'src/shims.d.ts'],
+  ignorePatterns: [
+    'dist/*',
+    'cypress/*',
+    'src/auto-imports.d.ts',
+    'src/components.d.ts',
+    'src/types.ts',
+    'src/shims.d.ts',
+    'src/client.d.ts',
+  ],
   rules: {
     // override/add rules settings here, such as:
+    'no-undef': 'off',  // Disable warnings for google maps library
     'vue/no-unused-vars': 'warn',
     'vue/multi-word-component-names': 'off',
     'vue/object-curly-spacing': [2, 'always'],
