@@ -4,7 +4,7 @@ specifiers:
   '@antfu/eslint-config': ^0.27.0
   '@iconify-json/carbon': ^1.1.8
   '@intlify/vite-plugin-vue-i18n': ^6.0.3
-  '@types/google-maps': ^3.2.3
+  '@types/google.maps': ^3.50.4
   '@types/markdown-it-link-attributes': ^3.0.1
   '@types/nprogress': ^0.2.0
   '@unocss/reset': ^0.45.28
@@ -68,7 +68,7 @@ devDependencies:
   '@antfu/eslint-config': 0.27.0_z4bbprzjrhnsfa24uvmcbu7f5q
   '@iconify-json/carbon': 1.1.8
   '@intlify/vite-plugin-vue-i18n': 6.0.3_vite@3.1.6+vue-i18n@9.2.2
-  '@types/google-maps': 3.2.3
+  '@types/google.maps': 3.50.4
   '@types/markdown-it-link-attributes': 3.0.1
   '@types/nprogress': 0.2.0
   '@vitejs/plugin-vue': 3.1.2_vite@3.1.6+vue@3.2.40
@@ -1874,12 +1874,6 @@ packages:
 
   /@types/estree/0.0.39:
     resolution: {integrity: sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==}
-    dev: true
-
-  /@types/google-maps/3.2.3:
-    resolution: {integrity: sha512-+GR/7sMvo2bENS26H4t2QqoCqE4FE5qhsG8aaDM9mJAlsorkLyaFdTQra8VkmS1RNE09fx9c1kac+GKG0RtA2A==}
-    dependencies:
-      '@types/google.maps': 3.50.4
     dev: true
 
   /@types/google.maps/3.50.4:

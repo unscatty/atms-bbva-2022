@@ -1,3 +1,5 @@
+import {} from 'google.maps'
+
 declare interface Window {
   // extend the window
 }
