@@ -1,25 +1,30 @@
 <script setup lang="ts">
 import { GoogleMap, Marker, InfoWindow } from 'vue3-google-map'
 import { toLatLngLiteral } from '~/utils/geolocation'
+import { atmToLatLngLiteral } from '~/models/atm/atm'
+import type { ATM } from '~/models/atm/atm'
 import styles from './style'
+import atmService from '~/services/atms/api/api-atm.service'
 
 const center = ref<google.maps.LatLngLiteral>({
   lat: 19.43302471023951,
   lng: -99.13224809885025,
 })
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-// const gmaps = ref<google.maps.Map>()
+
 const gmaps = ref<InstanceType<typeof GoogleMap>>()
 const currentPosition = ref<GeolocationPosition>()
-let distanceService: google.maps.DistanceMatrixService
+// let distanceService: google.maps.DistanceMatrixService
 
 let directionsServices: google.maps.DirectionsService
 let directionsRenderer: google.maps.DirectionsRenderer
 
-const distanceAPI = ref(0)
-let atmLocations = ref<any[]>([])
+// const distanceAPI = ref(0)
+let atmLocations = ref<ATM[]>([])
 
-const infoWindow = ref<InstanceType<typeof InfoWindow>>()
+// Modal dialog
+let modalOpen = ref(false)
+let selectedATM = ref<ATM>()
 
 const positionCallback = (position: GeolocationPosition) => {
   currentPosition.value = position
@@ -41,75 +46,26 @@ const getLocation = () => {
   }
 }
 
-const getNearATMs = async (position: google.maps.LatLngLiteral) => {
-  const now = new Date()
-
-  const bodyParams = {
-    metodo: 'getPuntos',
-    latitud: position.lat,
-    longitud: position.lng,
-    idOpcionCatalogo: 11,
-    idOpcionAtributo: 14,
-    dia: now.getDay(),
-    hora: '0:0',
-    ubicacion: 1,
-    direccion: 0,
-    // fecha: now.toString(),
-  }
-
-  const formBody = []
-  for (var property in bodyParams) {
-    var encodedKey = encodeURIComponent(property)
-    var encodedValue = encodeURIComponent(bodyParams[property])
-    formBody.push(encodedKey + '=' + encodedValue)
-  }
+const getNearATMs = async (location: google.maps.LatLngLiteral) => {
+  const bounds = new google.maps.LatLngBounds()
 
   try {
-    const apiResponse = await fetch(
-      'https://www.strategis.mx/Glocator/common/services/Buscador.ashx',
-      {
-        body: formBody.join('&'),
-        method: 'POST',
+    atmLocations.value = await atmService.getATMs(location)
 
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        },
-      }
-    )
-
-    const { Obj: data } = await apiResponse.json()
-    console.log(data)
-
-    const bounds = new google.maps.LatLngBounds()
-
-    atmLocations.value = data.map((val: any) => {
-      const latlng = {
-        lat: parseFloat(val.Latitud),
-        lng: parseFloat(val.Longitud),
-      } as google.maps.LatLngLiteral
-
-      bounds.extend(latlng)
-
-      return {
-        ...val,
-        latlng,
-      }
-    })
-
-    console.log(atmLocations.value)
-
-    gmaps.value?.map?.fitBounds(bounds)
-    gmaps.value?.map?.panToBounds(bounds)
+    atmLocations.value.forEach((atm) => bounds.extend(atmToLatLngLiteral(atm)))
   } catch (error) {
     console.error(error)
   }
+
+  gmaps.value?.map?.fitBounds(bounds)
+  gmaps.value?.map?.panToBounds(bounds)
 }
 
 const getRoute = async () => {
   await directionsServices.route(
     {
       origin: center.value,
-      destination: atmLocations.value[0].latlng,
+      destination: atmToLatLngLiteral(atmLocations.value[0]),
       travelMode: google.maps.TravelMode.DRIVING,
       unitSystem: google.maps.UnitSystem.METRIC,
     },
@@ -121,12 +77,10 @@ const getRoute = async () => {
   )
 }
 
-const setMarkerInfo = (location: any) => {
-  infoWindow.value?.infoWindow?.setContent(
-    `${Math.round(location.Distancia)} metros`
-  )
-  infoWindow.value?.infoWindow?.setPosition(location.latlng)
-  infoWindow.value?.infoWindow?.open(gmaps.value?.map)
+const showATMInfo = (atm: ATM) => {
+  selectedATM.value = atm
+
+  modalOpen.value = true
 }
 
 onMounted(() => {
@@ -141,6 +95,8 @@ onMounted(() => {
   }
 })
 
+const closeATMInfo = () => (modalOpen.value = false)
+
 watch(
   () => gmaps.value?.ready,
   (ready) => {
@@ -149,7 +105,7 @@ watch(
       directionsServices = new google.maps.DirectionsService()
       directionsRenderer = new google.maps.DirectionsRenderer()
       directionsRenderer.setMap(gmaps.value?.map || null)
-      distanceService = new google.maps.DistanceMatrixService()
+      // distanceService = new google.maps.DistanceMatrixService()
 
       // infoWindow.value?.infoWindow?.bindTo
     }
@@ -161,7 +117,7 @@ watch(
   <GoogleMap
     ref="gmaps"
     :api-key="API_KEY"
-    style="width: 100%; height: 800px"
+    class="absolute w-full h-full"
     :center="center"
     :zoom="15"
     :styles="styles"
@@ -171,22 +127,34 @@ watch(
     <Marker
       :options="{
         position: center,
-        // icon: 'https\:\/\/developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
       }"
     />
     <Marker
       v-for="(location, index) in atmLocations"
       :key="index"
-      :options="{ position: location.latlng }"
-    >
-      <!-- @mouseover="setMarkerInfo(location)" -->
-      <InfoWindow ref="infoWindow">
-        {{ Math.round(location.Distancia) }} metros
-      </InfoWindow>
-    </Marker>
+      :options="{ position: atmToLatLngLiteral(location) }"
+      @click="showATMInfo(location)"
+    />
+
+    <AtmInfoWindow
+      :atm="selectedATM!"
+      :show="modalOpen"
+      @close="closeATMInfo"
+    />
   </GoogleMap>
-  <div class="btn" @click="getLocation">Actualizar ubicación</div>
-  <div class="btn" @click="getNearATMs(center)">Cajeros cercanos</div>
-  <div class="btn" @click="getRoute()">Mostrar ruta</div>
-  <!-- <div class="btn" @click="calculateDistance">Calculate distance</div> -->
+  <div class="fixed bottom-0 w-full">
+    <div class="flex-inline items-center m-auto justify-start">
+      <div class="btn m-2" @click="getLocation">Actualizar ubicación</div>
+      <div class="btn m-2" @click="getNearATMs(center)">
+        Cajeros cercanos
+      </div>
+      <div class="btn m-2" @click="getRoute()">Mostrar ruta</div>
+      <!-- <div class="btn" @click="calculateDistance">Calculate distance</div> -->
+    </div>
+  </div>
 </template>
+
+<route lang="yaml">
+meta:
+  layout: map
+</route>
