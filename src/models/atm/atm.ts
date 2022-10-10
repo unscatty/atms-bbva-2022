@@ -1,3 +1,4 @@
+// Interface we'll use with csv files
 export interface ATM {
   id?: number
   sitio?: string
