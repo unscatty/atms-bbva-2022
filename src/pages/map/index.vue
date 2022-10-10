@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { GoogleMap, Marker, InfoWindow } from 'vue3-google-map'
 import { toLatLngLiteral } from '~/utils/geolocation'
+import { toLatLngLiteral as atmToLatLngLiteral } from '~/models/atm/atm'
+import { ATM } from '~/models/atm/atm'
+import { ApiATM, toATM } from '~/models/atms-api/api-atm'
 import styles from './style'
 
 const center = ref<google.maps.LatLngLiteral>({
@@ -11,13 +14,17 @@ const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 // const gmaps = ref<google.maps.Map>()
 const gmaps = ref<InstanceType<typeof GoogleMap>>()
 const currentPosition = ref<GeolocationPosition>()
-let distanceService: google.maps.DistanceMatrixService
+// let distanceService: google.maps.DistanceMatrixService
 
 let directionsServices: google.maps.DirectionsService
 let directionsRenderer: google.maps.DirectionsRenderer
 
-const distanceAPI = ref(0)
-let atmLocations = ref<any[]>([])
+// const distanceAPI = ref(0)
+let atmLocations = ref<ATM[]>([])
+
+// Modal dialog
+let modalOpen = ref(false)
+let selectedATM = ref<ATM>()
 
 const infoWindow = ref<InstanceType<typeof InfoWindow>>()
 
@@ -58,9 +65,9 @@ const getNearATMs = async (position: google.maps.LatLngLiteral) => {
   }
 
   const formBody = []
-  for (var property in bodyParams) {
-    var encodedKey = encodeURIComponent(property)
-    var encodedValue = encodeURIComponent(bodyParams[property])
+  for (let property in bodyParams) {
+    let encodedKey = encodeURIComponent(property)
+    let encodedValue = encodeURIComponent(bodyParams[property])
     formBody.push(encodedKey + '=' + encodedValue)
   }
 
@@ -77,23 +84,20 @@ const getNearATMs = async (position: google.maps.LatLngLiteral) => {
       }
     )
 
-    const { Obj: data } = await apiResponse.json()
+    const data = (await apiResponse.json()).Obj as ApiATM[]
     console.log(data)
 
     const bounds = new google.maps.LatLngBounds()
 
-    atmLocations.value = data.map((val: any) => {
+    atmLocations.value = data.map((val) => {
       const latlng = {
-        lat: parseFloat(val.Latitud),
-        lng: parseFloat(val.Longitud),
+        lat: parseFloat(val.Latitud || ''),
+        lng: parseFloat(val.Longitud || ''),
       } as google.maps.LatLngLiteral
 
       bounds.extend(latlng)
 
-      return {
-        ...val,
-        latlng,
-      }
+      return toATM(val)
     })
 
     console.log(atmLocations.value)
@@ -109,7 +113,7 @@ const getRoute = async () => {
   await directionsServices.route(
     {
       origin: center.value,
-      destination: atmLocations.value[0].latlng,
+      destination: atmToLatLngLiteral(atmLocations.value[0]),
       travelMode: google.maps.TravelMode.DRIVING,
       unitSystem: google.maps.UnitSystem.METRIC,
     },
@@ -119,6 +123,12 @@ const getRoute = async () => {
       }
     }
   )
+}
+
+const showATMInfo = (atm: ATM) => {
+  selectedATM.value = atm
+
+  modalOpen.value = true
 }
 
 const setMarkerInfo = (location: any) => {
@@ -141,6 +151,8 @@ onMounted(() => {
   }
 })
 
+const closeATMInfo = () => modalOpen.value = false
+
 watch(
   () => gmaps.value?.ready,
   (ready) => {
@@ -149,7 +161,7 @@ watch(
       directionsServices = new google.maps.DirectionsService()
       directionsRenderer = new google.maps.DirectionsRenderer()
       directionsRenderer.setMap(gmaps.value?.map || null)
-      distanceService = new google.maps.DistanceMatrixService()
+      // distanceService = new google.maps.DistanceMatrixService()
 
       // infoWindow.value?.infoWindow?.bindTo
     }
@@ -177,13 +189,17 @@ watch(
     <Marker
       v-for="(location, index) in atmLocations"
       :key="index"
-      :options="{ position: location.latlng }"
+      :options="{ position: atmToLatLngLiteral(location) }"
+      @click="showATMInfo(location)"
     >
       <!-- @mouseover="setMarkerInfo(location)" -->
-      <InfoWindow ref="infoWindow">
-        {{ Math.round(location.Distancia) }} metros
-      </InfoWindow>
+      <!-- <InfoWindow ref="infoWindow">
+        {{ Math.round(location.) }} metros
+      </InfoWindow> -->
     </Marker>
+
+    <AtmInfoWindow :atm="selectedATM!" :show="modalOpen" @close="closeATMInfo" />
+
   </GoogleMap>
   <div class="btn" @click="getLocation">Actualizar ubicación</div>
   <div class="btn" @click="getNearATMs(center)">Cajeros cercanos</div>
