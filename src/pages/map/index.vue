@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { GoogleMap, Marker, InfoWindow } from 'vue3-google-map'
 import { toLatLngLiteral } from '~/utils/geolocation'
-import { toLatLngLiteral as atmToLatLngLiteral } from '~/models/atm/atm'
-import { ATM } from '~/models/atm/atm'
-import { ApiATM, toATM } from '~/models/atms-api/api-atm'
+import { atmToLatLngLiteral } from '~/models/atm/atm'
+import type { ATM } from '~/models/atm/atm'
 import styles from './style'
+import atmService from '~/services/atms/api/api-atm.service'
 
 const center = ref<google.maps.LatLngLiteral>({
   lat: 19.43302471023951,
   lng: -99.13224809885025,
 })
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-// const gmaps = ref<google.maps.Map>()
+
 const gmaps = ref<InstanceType<typeof GoogleMap>>()
 const currentPosition = ref<GeolocationPosition>()
 // let distanceService: google.maps.DistanceMatrixService
@@ -25,8 +25,6 @@ let atmLocations = ref<ATM[]>([])
 // Modal dialog
 let modalOpen = ref(false)
 let selectedATM = ref<ATM>()
-
-const infoWindow = ref<InstanceType<typeof InfoWindow>>()
 
 const positionCallback = (position: GeolocationPosition) => {
   currentPosition.value = position
@@ -48,65 +46,19 @@ const getLocation = () => {
   }
 }
 
-const getNearATMs = async (position: google.maps.LatLngLiteral) => {
-  const now = new Date()
-
-  const bodyParams = {
-    metodo: 'getPuntos',
-    latitud: position.lat,
-    longitud: position.lng,
-    idOpcionCatalogo: 11,
-    idOpcionAtributo: 14,
-    dia: now.getDay(),
-    hora: '0:0',
-    ubicacion: 1,
-    direccion: 0,
-    // fecha: now.toString(),
-  }
-
-  const formBody = []
-  for (let property in bodyParams) {
-    let encodedKey = encodeURIComponent(property)
-    let encodedValue = encodeURIComponent(bodyParams[property])
-    formBody.push(encodedKey + '=' + encodedValue)
-  }
+const getNearATMs = async (location: google.maps.LatLngLiteral) => {
+  const bounds = new google.maps.LatLngBounds()
 
   try {
-    const apiResponse = await fetch(
-      'https://www.strategis.mx/Glocator/common/services/Buscador.ashx',
-      {
-        body: formBody.join('&'),
-        method: 'POST',
+    atmLocations.value = await atmService.getATMs(location)
 
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        },
-      }
-    )
-
-    const data = (await apiResponse.json()).Obj as ApiATM[]
-    console.log(data)
-
-    const bounds = new google.maps.LatLngBounds()
-
-    atmLocations.value = data.map((val) => {
-      const latlng = {
-        lat: parseFloat(val.Latitud || ''),
-        lng: parseFloat(val.Longitud || ''),
-      } as google.maps.LatLngLiteral
-
-      bounds.extend(latlng)
-
-      return toATM(val)
-    })
-
-    console.log(atmLocations.value)
-
-    gmaps.value?.map?.fitBounds(bounds)
-    gmaps.value?.map?.panToBounds(bounds)
+    atmLocations.value.forEach((atm) => bounds.extend(atmToLatLngLiteral(atm)))
   } catch (error) {
     console.error(error)
   }
+
+  gmaps.value?.map?.fitBounds(bounds)
+  gmaps.value?.map?.panToBounds(bounds)
 }
 
 const getRoute = async () => {
@@ -131,14 +83,6 @@ const showATMInfo = (atm: ATM) => {
   modalOpen.value = true
 }
 
-const setMarkerInfo = (location: any) => {
-  infoWindow.value?.infoWindow?.setContent(
-    `${Math.round(location.Distancia)} metros`
-  )
-  infoWindow.value?.infoWindow?.setPosition(location.latlng)
-  infoWindow.value?.infoWindow?.open(gmaps.value?.map)
-}
-
 onMounted(() => {
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
@@ -151,7 +95,7 @@ onMounted(() => {
   }
 })
 
-const closeATMInfo = () => modalOpen.value = false
+const closeATMInfo = () => (modalOpen.value = false)
 
 watch(
   () => gmaps.value?.ready,
@@ -183,7 +127,6 @@ watch(
     <Marker
       :options="{
         position: center,
-        // icon: 'https\:\/\/developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
       }"
     />
     <Marker
@@ -191,15 +134,13 @@ watch(
       :key="index"
       :options="{ position: atmToLatLngLiteral(location) }"
       @click="showATMInfo(location)"
-    >
-      <!-- @mouseover="setMarkerInfo(location)" -->
-      <!-- <InfoWindow ref="infoWindow">
-        {{ Math.round(location.) }} metros
-      </InfoWindow> -->
-    </Marker>
+    />
 
-    <AtmInfoWindow :atm="selectedATM!" :show="modalOpen" @close="closeATMInfo" />
-
+    <AtmInfoWindow
+      :atm="selectedATM!"
+      :show="modalOpen"
+      @close="closeATMInfo"
+    />
   </GoogleMap>
   <div class="btn" @click="getLocation">Actualizar ubicación</div>
   <div class="btn" @click="getNearATMs(center)">Cajeros cercanos</div>

@@ -1,23 +1,23 @@
-export type ATM = Partial<{
-  id: number
-  sitio: string
+export interface ATM {
+  id?: number
+  sitio?: string
   // ¿Código de región?
-  cr: number
-  division: string
-  marca: number
-  tipoDispositivo: string
-  estatus: string
-  calle: string
-  numExt: string
-  estado: string
-  ciudad: string
-  cp: string
+  cr?: number
+  division?: string
+  marca?: number
+  tipoDispositivo?: string
+  estatus?: string
+  calle?: string
+  numExt?: string
+  estado?: string
+  ciudad?: string
+  cp?: string
   // Delegación/Municipio
-  delMuni: string
-  colonia: string
-  latitud: number
-  longitud: number
-}>
+  delMuni?: string
+  colonia?: string
+  latitud?: number
+  longitud?: number
+}
 
 export const generateDescriptions = (
   atm: ATM
@@ -52,10 +52,10 @@ export const generateDescriptions = (
   ]
 }
 
-export const toLatLngLiteral = (atm: ATM): google.maps.LatLngLiteral => {
+export const atmToLatLngLiteral = (atm: ATM): google.maps.LatLngLiteral => {
   return { lat: atm.latitud || 0, lng: atm.longitud || 0 }
 }
 
-export const toLatLng = (atm: ATM): google.maps.LatLng => {
-  return new google.maps.LatLng(toLatLngLiteral(atm))
+export const atmToLatLng = (atm: ATM): google.maps.LatLng => {
+  return new google.maps.LatLng(atmToLatLngLiteral(atm))
 }

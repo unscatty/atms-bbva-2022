@@ -1,32 +1,32 @@
 import type { ATM } from '../atm/atm'
 
-export type ApiATM = Partial<{
-  IdPunto: number
-  IdCatalogo: number
-  Nombre: string
-  NombreLugar: string
-  HorarioSemana: string
-  HorarioSabatino: string
-  DisponibleSabado: boolean
-  Calle: string
-  NumeroExterior: string
-  NumeroInterior: string
-  CalleUno: string
-  CalleDos: string
-  Colonia: string
-  Delegacion: string
-  CodigoPostal: string
-  Estado: string
-  Latitud: string
-  Longitud: string
-  Distancia: number
-  Icono: string
-  Servicios: string[]
-  Cr: number
-  HorarioDomingo: string
-  Telefono: string
-  Correo: string
-}>
+export interface ApiATM {
+  IdPunto?: number
+  IdCatalogo?: number
+  Nombre?: string
+  NombreLugar?: string
+  HorarioSemana?: string
+  HorarioSabatino?: string
+  DisponibleSabado?: boolean
+  Calle?: string
+  NumeroExterior?: string
+  NumeroInterior?: string
+  CalleUno?: string
+  CalleDos?: string
+  Colonia?: string
+  Delegacion?: string
+  CodigoPostal?: string
+  Estado?: string
+  Latitud?: string
+  Longitud?: string
+  Distancia?: number
+  Icono?: string
+  Servicios?: string[]
+  Cr?: number
+  HorarioDomingo?: string
+  Telefono?: string
+  Correo?: string
+}
 
 export const toATM = (apiATM: ApiATM): ATM => {
   const {
