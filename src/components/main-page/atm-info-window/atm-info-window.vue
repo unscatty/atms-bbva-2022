@@ -51,14 +51,14 @@ const close = () => emit('close')
                       <div>
                         <!-- Title -->
                         <h2 class="text-lg font-medium text-gray-900">
-                          IMG_4985.HEIC
+                          Cajero Automático
                         </h2>
-                        <p class="text-sm font-medium text-gray-500">3.9 MB</p>
+                        <!-- <p class="text-sm font-medium text-gray-500">3.9 MB</p> -->
                       </div>
                     </div>
                   </div>
                   <div>
-                    <h3 class="font-medium text-gray-900">Information</h3>
+                    <h3 class="font-medium text-gray-900">Información</h3>
                     <dl
                       class="mt-2 divide-y divide-gray-200 border-t border-b border-gray-200"
                     >

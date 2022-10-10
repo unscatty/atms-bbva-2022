@@ -7,7 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    AtmInfoWindow: typeof import('./components/main-page/atm-info-side/atm-info-window.vue')['default']
+    AtmInfoWindow: typeof import('./components/main-page/atm-info-window/atm-info-window.vue')['default']
     Counter: typeof import('./components/Counter.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
     InfoRow: typeof import('./components/main-page/atm-info-side/info-row.vue')['default']

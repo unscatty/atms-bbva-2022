@@ -117,7 +117,7 @@ watch(
   <GoogleMap
     ref="gmaps"
     :api-key="API_KEY"
-    style="width: 100%; height: 800px"
+    class="absolute w-full h-full"
     :center="center"
     :zoom="15"
     :styles="styles"
@@ -142,8 +142,19 @@ watch(
       @close="closeATMInfo"
     />
   </GoogleMap>
-  <div class="btn" @click="getLocation">Actualizar ubicación</div>
-  <div class="btn" @click="getNearATMs(center)">Cajeros cercanos</div>
-  <div class="btn" @click="getRoute()">Mostrar ruta</div>
-  <!-- <div class="btn" @click="calculateDistance">Calculate distance</div> -->
+  <div class="fixed bottom-0 w-full">
+    <div class="flex-inline items-center m-auto justify-start">
+      <div class="btn m-2" @click="getLocation">Actualizar ubicación</div>
+      <div class="btn m-2" @click="getNearATMs(center)">
+        Cajeros cercanos
+      </div>
+      <div class="btn m-2" @click="getRoute()">Mostrar ruta</div>
+      <!-- <div class="btn" @click="calculateDistance">Calculate distance</div> -->
+    </div>
+  </div>
 </template>
+
+<route lang="yaml">
+meta:
+  layout: map
+</route>
