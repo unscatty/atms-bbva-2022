@@ -7,9 +7,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": false
   },
-  "files.associations": {
-    "*.css": "postcss"
-  },
+  "editor.formatOnSaveMode": "modificationsIfAvailable",
   "editor.formatOnSave": false,
   "typescript.tsdk": "node_modules/typescript/lib"
 }
