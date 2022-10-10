@@ -9,7 +9,7 @@ import { ATM, generateDescriptions } from '~/models/atm/atm'
 
 defineProps<{ atm: ATM; show: boolean }>()
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close'])
 
 const close = () => emit('close')
 </script>
@@ -32,19 +32,19 @@ const close = () => emit('close')
           />
         </TransitionChild>
         <div
-          class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full"
+          class="pointer-events-none fixed flex max-w-full w-full bottom-0 md:inset-y-0 md:right-0 md:flex-row-reverse"
         >
           <TransitionChild
             as="template"
             enter="transform transition ease-in-out duration-500 sm:duration-700"
-            enter-from="translate-x-full"
-            enter-to="translate-x-0"
+            enter-from="translate-y-full md:translate-x-full md:translate-y-0"
+            enter-to="translate-y-0 md:translate-x-0 md:translate-y-0"
             leave="transform transition ease-in-out duration-500 sm:duration-700"
-            leave-from="translate-x-0"
-            leave-to="translate-x-full"
+            leave-from="translate-y-0 md:translate-x-0 md:translate-y-0"
+            leave-to="translate-y-full md:translate-x-full md:translate-y-0"
           >
-            <div class="pointer-events-auto relative w-96">
-              <div class="h-full overflow-y-auto bg-white p-8">
+            <div class="pointer-events-auto relative w-full md:w-96">
+              <div class="h-full overflow-y-auto bg-white p-8 rounded-t-5 md:rounded-none">
                 <div class="space-y-6 pb-16">
                   <div>
                     <div class="mt-4 flex items-start justify-between">
