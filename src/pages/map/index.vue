@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { GoogleMap, Marker, InfoWindow } from 'vue3-google-map'
-import { toLatLngLiteral } from '~/utils/geolocation'
-import { atmToLatLngLiteral } from '~/models/atm/atm'
+import { GoogleMap, Marker } from 'vue3-google-map'
 import type { ATM } from '~/models/atm/atm'
-import styles from './style'
+import { atmToLatLngLiteral } from '~/models/atm/atm'
 import atmService from '~/services/atms/api/api-atm.service'
+import { toLatLngLiteral } from '~/utils/geolocation'
+import styles from './style'
 
 const center = ref<google.maps.LatLngLiteral>({
   lat: 19.43302471023951,
@@ -136,18 +136,18 @@ watch(
       @click="showATMInfo(location)"
     />
 
-    <AtmInfoWindow
-      :atm="selectedATM!"
+    <InfoDialog
+      title="Cajero Automático"
       :show="modalOpen"
       @close="closeATMInfo"
-    />
+    >
+      <ATMInfo :atm="selectedATM!" />
+    </InfoDialog>
   </GoogleMap>
   <div class="fixed bottom-0 w-full">
     <div class="flex-inline items-center m-auto justify-start">
       <div class="btn m-2" @click="getLocation">Actualizar ubicación</div>
-      <div class="btn m-2" @click="getNearATMs(center)">
-        Cajeros cercanos
-      </div>
+      <div class="btn m-2" @click="getNearATMs(center)">Cajeros cercanos</div>
       <div class="btn m-2" @click="getRoute()">Mostrar ruta</div>
       <!-- <div class="btn" @click="calculateDistance">Calculate distance</div> -->
     </div>

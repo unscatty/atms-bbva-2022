@@ -5,9 +5,8 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { ATM, generateDescriptions } from '~/models/atm/atm'
 
-defineProps<{ atm: ATM; show: boolean }>()
+defineProps<{ title: string; show: boolean }>()
 
 const emit = defineEmits(['close'])
 
@@ -43,37 +42,25 @@ const close = () => emit('close')
             leave-from="translate-y-0 md:translate-x-0 md:translate-y-0"
             leave-to="translate-y-full md:translate-x-full md:translate-y-0"
           >
-            <div class="pointer-events-auto relative w-full md:w-96">
-              <div class="h-full overflow-y-auto bg-white p-8 rounded-t-5 md:rounded-none">
+            <div class="pointer-events-auto relative w-full md:w-100">
+              <div
+                class="h-full overflow-y-auto bg-white p-8 rounded-t-5 md:rounded-none"
+              >
                 <div class="space-y-6 pb-16">
                   <div>
                     <div class="mt-4 flex items-start justify-between">
                       <div>
                         <!-- Title -->
                         <h2 class="text-lg font-medium text-gray-900">
-                          Cajero Automático
+                          {{ title }}
                         </h2>
                         <!-- <p class="text-sm font-medium text-gray-500">3.9 MB</p> -->
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <h3 class="font-medium text-gray-900">Información</h3>
-                    <dl
-                      class="mt-2 divide-y divide-gray-200 border-t border-b border-gray-200"
-                    >
-                      <div
-                        v-for="(description, index) in generateDescriptions(
-                          atm
-                        )"
-                        :key="index"
-                        class="flex justify-between py-3 text-sm font-medium"
-                      >
-                        <dt class="text-gray-500">{{ description.name }}</dt>
-                        <dd class="text-gray-900">{{ description.value }}</dd>
-                      </div>
-                    </dl>
-                  </div>
+                  <!-- Component -->
+                  <slot></slot>
+
                   <div class="flex">
                     <button
                       type="button"
