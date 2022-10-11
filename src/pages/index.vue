@@ -34,6 +34,13 @@ const positionCallback = (position: GeolocationPosition) => {
   console.log('location has changed')
 }
 
+const init = () => {
+  // Initialize all values when Google Maps API script is fully loaded
+  directionsServices = new google.maps.DirectionsService()
+  directionsRenderer = new google.maps.DirectionsRenderer()
+  directionsRenderer.setMap(gmaps.value?.map || null)
+}
+
 const getLocation = () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -101,9 +108,7 @@ watch(
   () => gmaps.value?.ready,
   (ready) => {
     if (ready) {
-      directionsServices = new google.maps.DirectionsService()
-      directionsRenderer = new google.maps.DirectionsRenderer()
-      directionsRenderer.setMap(gmaps.value?.map || null)
+      init()
     }
   }
 )
