@@ -180,15 +180,16 @@ export default defineConfig({
               unicodeEscapeSequence: true,
               numbersToExpressions: true,
               shuffleStringArray: true,
-              // splitStrings: true,
+              splitStrings: false,
               stringArrayThreshold: 1,
               identifierNamesGenerator: 'hexadecimal',
+              stringArray: false,
             },
           }),
         ],
       },
     },
-    minify: 'terser',
+    minify: 'esbuild',
     target: 'es2015',
     terserOptions: {
       compress: {

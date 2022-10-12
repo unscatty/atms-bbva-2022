@@ -76,5 +76,10 @@
   },
   "peerDependencies": {
     "rollup": "^2.79.1"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "recordrtc@5.6.2": "patches/recordrtc@5.6.2.patch"
+    }
   }
 }
