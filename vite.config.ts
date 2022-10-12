@@ -14,10 +14,15 @@ import Inspect from 'vite-plugin-inspect'
 import LinkAttributes from 'markdown-it-link-attributes'
 import Unocss from 'unocss/vite'
 import Shiki from 'markdown-it-shiki'
-import obfuscator, { type RollupPluginObfuscatorOptions } from 'rollup-plugin-obfuscator'
+import { parseEnvironmentVariables } from './src/utils/plugins/parse-env.plugin'
+import obfuscator, {
+  type RollupPluginObfuscatorOptions,
+} from 'rollup-plugin-obfuscator'
 
-// eslint-disable-next-line no-unused-vars
-const obfuscate = (obfuscator as any).default as (override: Partial<RollupPluginObfuscatorOptions>) => Plugin
+const obfuscate = (obfuscator as any).default as (
+  // eslint-disable-next-line no-unused-vars
+  override: Partial<RollupPluginObfuscatorOptions>
+) => Plugin
 
 export default defineConfig({
   resolve: {
@@ -53,10 +58,7 @@ export default defineConfig({
         '@vueuse/core',
       ],
       dts: 'src/auto-imports.d.ts',
-      dirs: [
-        'src/composables',
-        'src/store',
-      ],
+      dirs: ['src/composables', 'src/store'],
       vueTemplate: true,
       eslintrc: {
         enabled: true, // Default `false`
@@ -140,7 +142,7 @@ export default defineConfig({
     // https://github.com/antfu/vite-plugin-inspect
     // Visit http://localhost:3333/__inspect/ to see the inspector
     Inspect(),
-
+    parseEnvironmentVariables(),
   ],
 
   // https://github.com/vitest-dev/vitest
@@ -156,7 +158,9 @@ export default defineConfig({
   ssgOptions: {
     script: 'async',
     formatting: 'minify',
-    onFinished() { generateSitemap() },
+    onFinished() {
+      generateSitemap()
+    },
     format: 'cjs',
   },
 
@@ -168,7 +172,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        plugins: [ // <-- use plugins inside output to not merge chunks on one file
+        plugins: [
+          // <-- use plugins inside output to not merge chunks on one file
           obfuscate({
             globalOptions: {
               transformObjectKeys: true,
