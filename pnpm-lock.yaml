@@ -9,6 +9,7 @@ specifiers:
   '@types/google.maps': ^3.50.4
   '@types/markdown-it-link-attributes': ^3.0.1
   '@types/nprogress': ^0.2.0
+  '@types/recordrtc': ^5.6.8
   '@unocss/reset': ^0.45.29
   '@vitejs/plugin-vue': ^3.1.2
   '@vue/test-utils': ^2.1.0
@@ -31,6 +32,7 @@ specifiers:
   pinia: ^2.0.23
   pnpm: ^7.13.3
   prettier: ^2.7.1
+  recordrtc: ^5.6.2
   rollup: ^2.79.1
   rollup-plugin-obfuscator: ^0.2.2
   shiki: ^0.11.1
@@ -64,6 +66,7 @@ dependencies:
   inter-ui: 3.19.3
   nprogress: 0.2.0
   pinia: 2.0.23_bfjwoga25wxjazzogo7o372nwq
+  recordrtc: 5.6.2
   vue: 3.2.40
   vue-demi: 0.13.11_vue@3.2.40
   vue-i18n: 9.2.2_vue@3.2.40
@@ -77,6 +80,7 @@ devDependencies:
   '@types/google.maps': 3.50.4
   '@types/markdown-it-link-attributes': 3.0.1
   '@types/nprogress': 0.2.0
+  '@types/recordrtc': 5.6.8
   '@vitejs/plugin-vue': 3.1.2_vite@3.1.6+vue@3.2.40
   '@vue/test-utils': 2.1.0_vue@3.2.40
   critters: 0.0.16
@@ -2025,6 +2029,10 @@ packages:
 
   /@types/nprogress/0.2.0:
     resolution: {integrity: sha512-1cYJrqq9GezNFPsWTZpFut/d4CjpZqA0vhqDUPFWYKF1oIyBz5qnoYMzR+0C/T96t3ebLAC1SSnwrVOm5/j74A==}
+    dev: true
+
+  /@types/recordrtc/5.6.8:
+    resolution: {integrity: sha512-UJQOyTnRXihyKPdUMBur/VxrnXWRCl2AlazwR76mZUc+gnFVfl/MRm5Kz/UtKT7F2l9m4OGwNRyHvy/z765E1w==}
     dev: true
 
   /@types/resolve/1.17.1:
@@ -7349,6 +7357,10 @@ packages:
     dependencies:
       picomatch: 2.3.1
     dev: true
+
+  /recordrtc/5.6.2:
+    resolution: {integrity: sha512-1QNKKNtl7+KcwD1lyOgP3ZlbiJ1d0HtXnypUy7yq49xEERxk31PHvE9RCciDrulPCY7WJ+oz0R9hpNxgsIurGQ==}
+    dev: false
 
   /reflect-metadata/0.1.13:
     resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
