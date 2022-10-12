@@ -1,5 +1,11 @@
 import {} from 'google.maps'
 
+import { google } from '@google-cloud/dialogflow-cx/build/protos/protos'
+import DialogFlowCX = google.cloud.dialogflow.cx.v3
+
+export = DialogFlowCX
+export as namespace DialogFlowCX
+
 declare interface Window {
   // extend the window
 }
