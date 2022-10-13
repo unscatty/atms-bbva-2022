@@ -25,6 +25,7 @@
     "nprogress": "^0.2.0",
     "pinia": "^2.0.23",
     "recordrtc": "^5.6.2",
+    "socket.io-client": "^4.5.2",
     "uuid": "^9.0.0",
     "vue": "^3.2.40",
     "vue-demi": "^0.13.11",
