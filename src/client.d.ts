@@ -13,6 +13,10 @@ interface ImportMetaEnv {
   readonly VITE_DIALOGFLOW_AUDIO_ENCODING: string
   readonly VITE_DIALOGFLOW_AUDIO_SAMPLE_RATE: number
   readonly VITE_DIALOGFLOW_LANGUAGE_CODE: string
+
+  // Server
+  readonly VITE_SERVER_ENDPOINT: string
+  readonly VITE_SERVER_SOCKET_ENDPOINT: string
   // more env variables...
 }
 
