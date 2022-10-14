@@ -7,6 +7,16 @@ export default class RecordService {
     this.recorder = new RecordRTCPromisesHandler(...args)
   }
 
+  static stream(
+    ...args: ConstructorParameters<typeof RecordRTCPromisesHandler>
+  ) {
+    return new this(...args)
+  }
+
+  get recorderInstance() {
+    return this.recorder
+  }
+
   async startRecording() {
     return this.recorder.startRecording()
   }
@@ -31,7 +41,11 @@ export default class RecordService {
     return this.recorder.getDataURL()
   }
 
-  private async stopAndGet<T>(func: () => T, reset = false, ...funcArgs: never[]) {
+  private async stopAndGet<T>(
+    func: () => T,
+    reset = false,
+    ...funcArgs: never[]
+  ) {
     await this.stopRecording()
     const data = func.bind(this, ...funcArgs)()
 
