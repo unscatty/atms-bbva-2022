@@ -1,3 +1,5 @@
+import recorderWorlketURL from '~/worklets/recorderWorkletProcessor.js?url'
+
 export default class AudioContextRecorderService {
   context: AudioContext
   workletProcessorURL: string
@@ -10,7 +12,7 @@ export default class AudioContextRecorderService {
     contextOptions: AudioContextOptions,
     workletProcessorURL: string
   ) {
-    this.context = new AudioContext(contextOptions)
+    this.context = new window.AudioContext(contextOptions)
 
     this.workletProcessorURL = workletProcessorURL
   }
@@ -19,6 +21,10 @@ export default class AudioContextRecorderService {
     onAudioConnected: () => void,
     onMessage: InstanceType<typeof MessagePort>['onmessage']
   ) {
+    // Load processor worklet
+    await this.context.audioWorklet.addModule(this.workletProcessorURL)
+    this.context.resume()
+
     // Ask for permission to use audio
     this.stream = await navigator.mediaDevices.getUserMedia({ audio: true })
 
@@ -28,17 +34,13 @@ export default class AudioContextRecorderService {
 
     onAudioConnected()
 
-    // Load processor worklet
-    await this.context.audioWorklet.addModule(this.workletProcessorURL)
-    this.context.resume()
-
     this.input = this.context.createMediaStreamSource(this.stream)
     this.processor = new AudioWorkletNode(this.context, 'recorder.worklet')
 
     this.processor.connect(this.context.destination)
     this.context.resume()
 
-    this.input.connect(this.processor)
+    this.input?.connect(this.processor)
 
     this.processor.port.onmessage = onMessage
   }
@@ -66,7 +68,7 @@ export const defaultAudioContextRecorderService =
   new AudioContextRecorderService(
     {
       latencyHint: 'interactive',
-      sampleRate: import.meta.env.VITE_DIALOGFLOW_AUDIO_SAMPLE_RATE,
+      // sampleRate: 16_000
     },
-    '/js/recorderWorkletProcessor.js'
+    recorderWorlketURL
   )

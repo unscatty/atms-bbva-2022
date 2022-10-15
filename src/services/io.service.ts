@@ -21,16 +21,8 @@ export default class IOService {
     return this.socket
   }
 
-  emitBinaryStream(
-    event: string,
-    blob: Blob,
-    options: { name: string; size: number }
-  ) {
-    const stream = ss.createStream({})
-
-    ss(this.socket, {}).emit(event, stream, options)
-
-    ss.createBlobReadStream(blob).pipe(stream)
+  emitBinaryStream(event: string, blob: Blob) {
+    this.socket.emit(event, blob)
   }
 
   async emitAsync<T>(...args: Parameters<InstanceType<typeof Socket>['emit']>) {
