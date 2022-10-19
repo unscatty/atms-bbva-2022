@@ -1,7 +1,6 @@
 import { io, Socket } from 'socket.io-client'
 // import * as ss from '~/libs/node-socketio-stream'
 
-declare const ss: any
 
 // Service used to comunicate with server via Socket.io
 export default class IOService {
@@ -51,5 +50,11 @@ export default class IOService {
 }
 
 export const defaultIOService = new IOService(
-  import.meta.env.VITE_SERVER_SOCKET_ENDPOINT
+  import.meta.env.VITE_SERVER_SOCKET_ENDPOINT,
+  {
+    extraHeaders: {
+      'Bypass-Tunnel-Reminder': 'true',
+    },
+    // withCredentials: true,
+  }
 )

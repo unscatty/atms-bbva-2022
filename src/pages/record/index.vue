@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { defaultIOService as ioService } from '~/services/io.service'
 import RecordService, {
   recordRTCDefaultOptions,
 } from '~/services/record.service'
-import { defaultIOService as ioService } from '~/services/io.service'
-import { defaultAudioContextRecorderService as contextRecorder } from '~/services/audio-context-recorder.service'
-import { io } from 'socket.io-client'
+import { toLatLngLiteral } from '../../utils/geolocation'
+// import { defaultAudioContextRecorderService as contextRecorder } from '~/services/audio-context-recorder.service'
 
 // import recorderWorkletURL from '../../worklets/recorderWorkletProcessor.js?url'
 // import AudioContextRecorderService from '~/services/audio-context-recorder.service'
@@ -17,6 +17,21 @@ let recorder: RecordService
 const recordDataURL = ref('')
 const transcript = ref('')
 const echoURL = ref('')
+const echoAudioRef = ref<HTMLAudioElement>()
+const textResponse = ref('')
+const location = ref<google.maps.LatLngLiteral>()
+
+const positionCallback = (position: GeolocationPosition) => {
+  location.value = toLatLngLiteral(position)
+
+  console.log('location has changed')
+}
+
+const getLocation = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(positionCallback, console.error)
+  }
+}
 
 // const contextRecorder = new AudioContextRecorderService(
 //   { latencyHint: 'interactive' },
@@ -38,36 +53,40 @@ const stopRecording = async () => {
 
 onMounted(() => {
   ioService.onConnect(() => console.log('connected'))
-  // socket = ioService.socketInstance
-
-  // socket.on()
-
-  // socket.on('connected', () => console.log('connected'))
-  // socket.on('detected-intent', (response) => {
-  //   console.log(response)
-  // })
+  getLocation()
 })
 
 const detectIntent = async () => {
   // socket.emit('detect-intent', transcript.value)
-  const response = await ioService.emitText('detect-intent', transcript.value)
+  const response = await ioService.emitText<DialogFlowCX.IDetectIntentResponse>(
+    'detect-intent',
+    transcript.value
+  )
   console.log(response)
+
+  textResponse.value =
+    response?.queryResult?.responseMessages?.at(0)?.text?.text?.at(0) || ''
 }
 
 const detectIntentAudio = async () => {
-  const response = await ioService.emitAudio(
-    'detect-intent-audio',
-    await recorder.getBlob()
-  )
+  const response =
+    await ioService.emitAudio<DialogFlowCX.IDetectIntentResponse>(
+      'detect-intent-audio',
+      await recorder.getBlob()
+    )
 
   console.log(response)
+
+  textResponse.value =
+    response?.queryResult?.responseMessages?.at(0)?.text?.text?.at(0) || ''
 }
 
 const detectIntentAudioSynthesize = async () => {
-  const response = await ioService.emitAudio(
-    'detect-intent-audio-synth',
-    await recorder.getBlob()
-  )
+  const response =
+    await ioService.emitAudio<DialogFlowCX.IDetectIntentResponse>(
+      'detect-intent-audio-synth',
+      await recorder.getBlob()
+    )
 
   console.log(response)
 
@@ -85,56 +104,120 @@ const echoAudio = async () => {
   echoURL.value = URL.createObjectURL(new Blob([new Uint8Array(response)]))
 }
 
-const startStreamingAudio = async () => {
-  ioService.socketInstance.on('intent-matched', (data: DialogFlowCX.IStreamingDetectIntentResponse) => {
-    const audio = data.detectIntentResponse?.outputAudio;
+// const startStreamingAudio = async () => {
+//   ioService.socketInstance.on('intent-matched', (data: DialogFlowCX.IStreamingDetectIntentResponse) => {
+//     const audio = data.detectIntentResponse?.outputAudio;
 
-    echoURL.value = URL.createObjectURL(
-    new Blob([new Uint8Array(audio as ArrayBuffer)])
-  )
-  })
+//     echoURL.value = URL.createObjectURL(
+//     new Blob([new Uint8Array(audio as ArrayBuffer)])
+//   )
+//   })
 
-  await contextRecorder.startStreaming(
-    () => {
-      console.log('audio connected')
-      ioService.emitBinaryStream('start-streaming-audio', new Blob())
-    },
-    (event) => {
-      const audioData = event.data
-      ioService.emitBinaryStream('on-stream-data', audioData)
-    }
-  )
+//   await contextRecorder.startStreaming(
+//     () => {
+//       console.log('audio connected')
+//       ioService.emitBinaryStream('start-streaming-audio', new Blob())
+//     },
+//     (event) => {
+//       const audioData = event.data
+//       ioService.emitBinaryStream('on-stream-data', audioData)
+//     }
+//   )
+// }
+
+const restartConversation = () => {
+  ioService.socketInstance.emit('reset-conversation')
 }
 
 const stopStreamingAudio = async () => {
-  // await re
+  await recorder.stopRecording()
 
-  await contextRecorder.stopRecording(() => {
-    ioService.socketInstance.emit('on-stream-stop')
-  })
+  ioService.socketInstance.emit('stop-streaming-audio')
+
+  // await contextRecorder.stopRecording(() => {
+  //   ioService.socketInstance.emit('on-stream-stop')
+  // })
 }
 
 const streamAudioRTC = async () => {
   const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true })
 
   ioService.socketInstance.on(
-    'intent-matched',
+    'stream-intent-matched',
     (data: DialogFlowCX.IStreamingDetectIntentResponse) => {
+      console.debug(data)
       const audio = data.detectIntentResponse?.outputAudio
+      // data.detectIntentResponse.queryResult.webhookPayloads[0].fields.a.
 
       echoURL.value = URL.createObjectURL(
         new Blob([new Uint8Array(audio as ArrayBuffer)])
       )
+
+      recorder.recorderInstance.pauseRecording().then(() => {
+        ioService.socketInstance.emit('pause-streaming-audio')
+      })
+
+      if (echoAudioRef.value) {
+        echoAudioRef.value.onended = () =>
+          recorder.recorderInstance.resumeRecording().then(() => {
+            ioService.socketInstance.emit('resume-streaming-audio')
+          })
+      }
+
+      echoAudioRef.value?.play()
     }
   )
 
-  ioService.emitBinaryStream('start-streaming-audio', new Blob())
+  ioService.socketInstance.emit('start-streaming-audio', {
+    queryParams: {
+      payload: {
+        fields: {
+          location: {
+            structValue: {
+              fields: {
+                lat: {
+                  numberValue: location.value?.lat,
+                },
+                lng: {
+                  numberValue: location.value?.lng,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
 
   recorder = RecordService.stream(mediaStream, {
     ...recordRTCDefaultOptions,
-    // timeSlice: 5000,
+    timeSlice: 250,
     ondataavailable(data) {
-      ioService.emitBinaryStream('on-stream-data', data)
+      ioService.socketInstance.emit('stream-audio-data', {
+        queryParams: {
+          payload: {
+            fields: {
+              location: {
+                structValue: {
+                  fields: {
+                    lat: {
+                      numberValue: location.value?.lat,
+                    },
+                    lng: {
+                      numberValue: location.value?.lng,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        queryInput: {
+          audio: {
+            audio: data as unknown as Uint8Array,
+          },
+        },
+      } as DialogFlowCX.IStreamingDetectIntentRequest)
     },
   })
 
@@ -144,9 +227,15 @@ const streamAudioRTC = async () => {
 
 <template>
   <div>
-    <audio :src="recordDataURL" controls></audio>
-    <audio :src="echoURL" controls></audio>
+    <!-- <audio :src="recordDataURL" controls></audio> -->
+    <audio
+      ref="echoAudioRef"
+      :src="echoURL"
+      autoplay
+      style="display: none"
+    ></audio>
     <input v-model="transcript" type="text" />
+    <span>{{ textResponse }}</span>
     <button class="btn" @click="startRecording">Start recording</button>
     <button class="btn" @click="stopRecording">Stop recording</button>
     <button class="btn" @click="detectIntent">Detect Intent</button>
@@ -154,10 +243,13 @@ const streamAudioRTC = async () => {
     <button class="btn" @click="detectIntentAudioSynthesize">
       Detect Intent Audio Synth
     </button>
-    <button class="btn" @click="startStreamingAudio">Stream Audio</button>
-    <!-- <button class="btn" @click="streamAudioRTC">Stream Audio</button> -->
+    <!-- <button class="btn" @click="startStreamingAudio">Stream Audio</button> -->
+    <button class="btn" @click="streamAudioRTC">Stream Audio</button>
     <button class="btn" @click="stopStreamingAudio">Stop Stream Audio</button>
-    <button class="btn" @click="echoAudio">Echo Audio</button>
+    <button class="btn" @click="restartConversation">
+      Restart Conversation
+    </button>
+    <!-- <button class="btn" @click="echoAudio">Echo Audio</button> -->
   </div>
 </template>
 
