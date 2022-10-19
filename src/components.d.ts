@@ -8,11 +8,18 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     ATMInfo: typeof import('./components/main-page/ATMInfo.vue')['default']
+    ChatbotMessage: typeof import('./components/chatbot/messages/ChatbotReplyMessage.vue')['default']
+    ChatbotReplyGroup: typeof import('./components/chatbot/messages/ChatbotReplyGroup.vue')['default']
+    ChatbotReplyMessage: typeof import('./components/chatbot/messages/ChatbotReplyMessage.vue')['default']
     Counter: typeof import('./components/Counter.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
     InfoDialog: typeof import('./components/InfoDialog.vue')['default']
     README: typeof import('./components/README.md')['default']
+    ReplyMessage: typeof import('./components/chatbot/messages/ReplyMessage.vue')['default']
+    ReplyMessageGroup: typeof import('./components/chatbot/messages/ReplyMessageGroup.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UserMessage: typeof import('./components/chatbot/messages/UserMessage.vue')['default']
+    UserMessageGroup: typeof import('./components/chatbot/messages/UserMessageGroup.vue')['default']
   }
 }
