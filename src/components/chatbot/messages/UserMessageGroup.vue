@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ChatbotUserMessage from '~/models/chatbot/messages/user-message'
 
-defineProps<{ messages: ChatbotUserMessage[] }>()
+defineProps<{ messages: ChatbotUserMessage[], imgSrc: string }>()
 </script>
 
 <template>
@@ -15,8 +15,8 @@ defineProps<{ messages: ChatbotUserMessage[] }>()
         </template>
       </div>
       <img
-        src="https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
-        alt="My profile"
+        :src="imgSrc"
+        alt="User image"
         class="w-6 h-6 rounded-full order-2"
       />
     </div>

@@ -6,7 +6,7 @@ defineProps<{ message: ChatbotUserMessage }>()
 
 <template>
   <div>
-    <span class="px-4 py-2 rounded-lg inline-block bg-blue-600 text-white">
+    <span class="px-4 py-2 rounded-lg inline-block bg-blue-600 text-white md:text-sm">
       {{ message.text }}
     </span>
   </div>

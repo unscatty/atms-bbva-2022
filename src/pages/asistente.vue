@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import ChatbotReplyMessage from '~/models/chatbot/messages/reply-message'
 import ChatbotUserMessage from '~/models/chatbot/messages/user-message'
+import ChatbotReplyMessage from '~/models/chatbot/messages/reply-message'
 
 enum ChatbotGroup {
-  CHATBOT_REPLIES,
-  USER_MESSAGES,
+  CHATBOT_REPLIES = 'CHATBOT_REPLIES',
+  USER_MESSAGES = 'USER_MESSAGES',
 }
 
 type ReplyGroup = {
@@ -17,43 +17,129 @@ type UserGroup = {
   messages: ChatbotUserMessage[]
 }
 
+const userInput = ref('')
+const placeholder = 'Escribe un mensaje'
+const defaultUserImage =
+  'https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144'
+const defaultBotImage =
+  'https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144'
+
 const chatMessages = ref<Array<UserGroup | ReplyGroup>>([
-  {
-    kind: ChatbotGroup.USER_MESSAGES,
-    messages: [
-      {
-        text: 'Hola quiero saber todo',
-        timestamp: new Date(),
-      },
-      {
-        text: 'Por favor',
-        timestamp: new Date(),
-      },
-    ],
-  },
-  {
-    kind: ChatbotGroup.CHATBOT_REPLIES,
-    messages: [
-      {
-        text: 'OK',
-        timestamp: new Date(),
-      },
-      {
-        text: 'Te lo diré',
-        timestamp: new Date(),
-      },
-    ],
-  },
-  {
-    kind: ChatbotGroup.USER_MESSAGES,
-    messages: [
-      {
-        text: 'Gracias tkm',
-        timestamp: new Date(),
-      },
-    ],
-  },
+  // {
+  //   kind: ChatbotGroup.USER_MESSAGES,
+  //   messages: [
+  //     {
+  //       text: 'Hola quiero saber todo',
+  //       timestamp: new Date(),
+  //     },
+  //     {
+  //       text: 'Por favor',
+  //       timestamp: new Date(),
+  //     },
+  //   ],
+  // },
+  // {
+  //   kind: ChatbotGroup.CHATBOT_REPLIES,
+  //   messages: [
+  //     {
+  //       text: 'OK',
+  //       timestamp: new Date(),
+  //     },
+  //     {
+  //       text: 'Te lo diré',
+  //       timestamp: new Date(),
+  //     },
+  //   ],
+  // },
+  // {
+  //   kind: ChatbotGroup.USER_MESSAGES,
+  //   messages: [
+  //     {
+  //       text: 'Gracias tkm',
+  //       timestamp: new Date(),
+  //     },
+  //   ],
+  // },
 ])
+
+const messagesLength = computed(() => chatMessages.value.length)
+
+const mockupMessage = () => {
+  const userTextInput = userInput.value
+
+  if (userTextInput.startsWith('reply:')) {
+    addBotReplyMessage({
+      text: userTextInput.replace('reply:', ''),
+      timestamp: new Date(),
+    })
+  } else {
+    addUserMessage({
+      text: userTextInput,
+      timestamp: new Date(),
+    })
+  }
+
+  userInput.value = ''
+}
+
+const createUserMessage = () => {
+  const userTextInput = userInput.value
+
+  addUserMessage({
+    text: userTextInput,
+    timestamp: new Date(),
+  })
+
+  userInput.value = ''
+}
+
+const addUserMessage = (message: ChatbotUserMessage) => {
+  const lastMessage = chatMessages.value[messagesLength.value - 1]
+
+  // There are no messages or last message is reply from bot
+  if (!lastMessage || lastMessage.kind === ChatbotGroup.CHATBOT_REPLIES) {
+    // Create user message group
+    const newUserMessageGroup: ChatbotUserMessage[] = [message]
+
+    // Push new message group to messages array
+    chatMessages.value.push({
+      kind: ChatbotGroup.USER_MESSAGES,
+      messages: newUserMessageGroup,
+    })
+
+    return
+  }
+
+  if (lastMessage.kind === ChatbotGroup.USER_MESSAGES) {
+    // Push new message to message group
+    lastMessage.messages.push(message)
+  }
+
+  console.log(lastMessage)
+}
+
+const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
+  const lastMessage = chatMessages.value[messagesLength.value - 1]
+
+  // There are no messages or last message is message from user
+  if (!lastMessage || lastMessage.kind === ChatbotGroup.USER_MESSAGES) {
+    // Create user message group
+    const newUserMessageGroup: ChatbotUserMessage[] = [replyMessage]
+
+    // Push new message group to messages array
+    chatMessages.value.push({
+      kind: ChatbotGroup.CHATBOT_REPLIES,
+      messages: newUserMessageGroup,
+    })
+
+    return
+  }
+
+  if (lastMessage.kind === ChatbotGroup.CHATBOT_REPLIES) {
+    // Push new message to message group
+    lastMessage.messages.push(replyMessage)
+  }
+}
 </script>
 
 <template>
@@ -144,16 +230,18 @@ const chatMessages = ref<Array<UserGroup | ReplyGroup>>([
     </div>
     <!-- <Messages> -->
     <div
-      class="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch"
+      class="flex flex-col justify-end h-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch"
     >
       <template v-for="(messageGroup, index) in chatMessages" :key="index">
         <UserMessageGroup
           v-if="messageGroup.kind === ChatbotGroup.USER_MESSAGES"
           :messages="messageGroup.messages"
+          :img-src="defaultUserImage"
         />
         <ReplyMessageGroup
           v-if="messageGroup.kind === ChatbotGroup.CHATBOT_REPLIES"
           :messages="messageGroup.messages"
+          :img-src="defaultBotImage"
         />
       </template>
     </div>
@@ -183,9 +271,11 @@ const chatMessages = ref<Array<UserGroup | ReplyGroup>>([
           </button>
         </span>
         <input
+          v-model="userInput"
           type="text"
-          placeholder="Write your message!"
+          :placeholder="placeholder"
           class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3"
+          @keydown.enter="mockupMessage"
         />
         <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
           <button
@@ -255,7 +345,7 @@ const chatMessages = ref<Array<UserGroup | ReplyGroup>>([
             type="button"
             class="inline-flex items-center justify-center rounded-lg px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none"
           >
-            <span class="font-bold">Send</span>
+            <span class="font-bold"> Enviar </span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
@@ -273,7 +363,7 @@ const chatMessages = ref<Array<UserGroup | ReplyGroup>>([
   </div>
 </template>
 
-<style>
+<style scoped>
 .scrollbar-w-2::-webkit-scrollbar {
   width: 0.25rem;
   height: 0.25rem;
