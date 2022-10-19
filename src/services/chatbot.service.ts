@@ -1,0 +1,78 @@
+import RecordRTC from 'recordrtc'
+import IOService, { defaultIOService } from './io.service'
+import RecordService, { recordRTCDefaultOptions } from './record.service'
+
+export default class ChatbotService {
+  recorder?: RecordService
+  ioService: IOService
+
+  constructor() {
+    this.ioService = defaultIOService
+    this.ioService.onConnect(() => console.log('connected'))
+  }
+
+  async startStreamingAudio(
+    // eslint-disable-next-line no-unused-vars
+    options: {
+      initialStreamData: DialogFlowCX.IDetectIntentRequest
+      // eslint-disable-next-line no-unused-vars
+      streamDataWrapper: (...args: any[]) => DialogFlowCX.IDetectIntentRequest
+      onIntentMatched: (
+        // eslint-disable-next-line no-unused-vars
+        data: DialogFlowCX.IStreamingDetectIntentResponse
+      ) => void
+    },
+    recoderOptions: Partial<RecordRTC.Options> = { timeSlice: 250 }
+  ) {
+    // Ask for audio permissions
+    const mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    })
+
+    // Initialize recorder
+    this.recorder = new RecordService(mediaStream, {
+      ...recordRTCDefaultOptions,
+      ...recoderOptions,
+      ondataavailable: (data) => {
+        this.ioService.socketInstance.emit('stream-audio-data', {
+          ...options.streamDataWrapper(),
+          queryInput: {
+            audio: {
+              audio: data as unknown as Uint8Array,
+            },
+          },
+        } as DialogFlowCX.IStreamingDetectIntentRequest)
+      },
+    })
+
+    // Setup listener when intent is matched
+    this.ioService.socketInstance.on(
+      'stream-intent-matched',
+      options.onIntentMatched
+    )
+
+    // Start the audio stream
+    await this.recorder.startRecording()
+
+    // Send initial request to start streaming
+    this.ioService.socketInstance.emit(
+      'start-streaming-audio',
+      options.initialStreamData
+    )
+  }
+
+  async sendTextMessage(text: string) {
+    return this.ioService.emitText<DialogFlowCX.IDetectIntentResponse>(
+      'detect-intent',
+      text
+    )
+  }
+
+  async pauseStreaming() {
+    return this.recorder?.recorderInstance?.pauseRecording()
+  }
+
+  async resumeStreaming() {
+    return this.recorder?.recorderInstance?.resumeRecording()
+  }
+}

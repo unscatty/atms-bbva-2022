@@ -33,13 +33,6 @@ const getLocation = () => {
   }
 }
 
-// const contextRecorder = new AudioContextRecorderService(
-//   { latencyHint: 'interactive' },
-//   // '~/worklets/recorderWorkletProcessor.js'
-//   'recorderWorkletURL'
-// )
-// let socket: Socket
-
 const startRecording = async () => {
   const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true })
 
@@ -103,27 +96,6 @@ const echoAudio = async () => {
   console.log(response)
   echoURL.value = URL.createObjectURL(new Blob([new Uint8Array(response)]))
 }
-
-// const startStreamingAudio = async () => {
-//   ioService.socketInstance.on('intent-matched', (data: DialogFlowCX.IStreamingDetectIntentResponse) => {
-//     const audio = data.detectIntentResponse?.outputAudio;
-
-//     echoURL.value = URL.createObjectURL(
-//     new Blob([new Uint8Array(audio as ArrayBuffer)])
-//   )
-//   })
-
-//   await contextRecorder.startStreaming(
-//     () => {
-//       console.log('audio connected')
-//       ioService.emitBinaryStream('start-streaming-audio', new Blob())
-//     },
-//     (event) => {
-//       const audioData = event.data
-//       ioService.emitBinaryStream('on-stream-data', audioData)
-//     }
-//   )
-// }
 
 const restartConversation = () => {
   ioService.socketInstance.emit('reset-conversation')
