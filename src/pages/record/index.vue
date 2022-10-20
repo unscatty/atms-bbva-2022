@@ -232,7 +232,10 @@ const streamAudioRTC = async () => {
       await chatbotService.pauseStreaming()
 
       if (echoAudioRef.value) {
-        echoAudioRef.value.onended = () => chatbotService.resumeStreaming()
+        echoAudioRef.value.onended = () => {
+          chatbotService.resumeStreaming()
+          URL.revokeObjectURL(echoURL.value)
+        }
       }
 
       echoAudioRef.value?.play()

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import ChatbotUserMessage from '~/models/chatbot/messages/user-message'
-import ChatbotReplyMessage from '~/models/chatbot/messages/reply-message'
 import {
   ChatbotGroup,
   ReplyGroup,
   UserGroup,
 } from '~/models/chatbot/messages/helper-types'
+import ChatbotReplyMessage from '~/models/chatbot/messages/reply-message'
+import ChatbotUserMessage from '~/models/chatbot/messages/user-message'
 import { defaultChatbotService as chatbotService } from '~/services/chatbot.service'
 import { toLatLngLiteral } from '../utils/geolocation'
 
@@ -22,9 +22,140 @@ const messagesLength = computed(() => chatMessages.value.length)
 
 const location = ref<google.maps.LatLngLiteral>()
 
+// Variables for streaming
+const isStreaming = ref(false)
+// The audio element to playback the audio response
+const echoURL = ref('')
+const echoAudioRef = ref<HTMLAudioElement>()
+
+// The panel where messages are displayed
+// This is used to auto-scroll the panel if overflown
+const messagesPanelRef = ref<HTMLElement>()
+
 onMounted(() => {
   getLocation()
 })
+
+// Auto scroll messages
+watch(chatMessages.value, () => {
+  if (messagesPanelRef && messagesPanelRef.value) {
+    messagesPanelRef.value.scrollTop = 99_999_999
+  }
+})
+
+// Stream audio to backend
+const startStreamingAudio = async () => {
+  // Set the structure for the data sent to backend
+  const getStreamData = (): DialogFlowCX.IStreamingDetectIntentRequest => {
+    return {
+      queryParams: {
+        payload: {
+          fields: {
+            location: {
+              structValue: {
+                fields: {
+                  lat: {
+                    numberValue: location.value?.lat,
+                  },
+                  lng: {
+                    numberValue: location.value?.lng,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+  }
+
+  // Start the audio stream
+  await chatbotService.startStreamingAudio({
+    initialStreamData: getStreamData(),
+    streamDataWrapper: getStreamData,
+    onIntentMatched: async (data) => {
+      console.debug('Intent matched:')
+      console.debug(data)
+
+      // Show response as bot reply
+      createBotReplies(data.detectIntentResponse?.queryResult?.responseMessages)
+
+      const audio = data.detectIntentResponse?.outputAudio
+      // data.detectIntentResponse.queryResult.webhookPayloads[0].fields.a.
+
+      echoURL.value = URL.createObjectURL(
+        new Blob([new Uint8Array(audio as ArrayBuffer)])
+      )
+
+      // Pause recording so audio is not streamed twice
+      await chatbotService.pauseStreaming()
+
+      // Resume recording when audio finishes playing
+      if (echoAudioRef.value) {
+        echoAudioRef.value.onended = () => {
+          chatbotService.resumeStreaming()
+          URL.revokeObjectURL(echoURL.value)
+        }
+      }
+
+      echoAudioRef.value?.play()
+    },
+    onRecognitionResult: async (data) => {
+      console.debug('Recognition result:')
+      console.debug(data)
+
+      // Show recognition result as user message
+      addTranscript(data.recognitionResult!)
+    },
+  })
+
+  isStreaming.value = true
+}
+
+// Add recognitions result transcript as a user message
+const addTranscript = (
+  recognitionResult: DialogFlowCX.IStreamingRecognitionResult
+) => {
+  const lastMessageGroup = chatMessages.value.at(-1)
+
+  if (
+    !lastMessageGroup ||
+    lastMessageGroup.kind === ChatbotGroup.CHATBOT_REPLIES
+  ) {
+    // Insert new message
+    const userMessageGroup: UserGroup = {
+      kind: ChatbotGroup.USER_MESSAGES,
+      messages: [
+        {
+          text: recognitionResult.transcript!,
+          timestamp: new Date(),
+        },
+      ],
+    }
+
+    chatMessages.value.push(userMessageGroup)
+  } else if (lastMessageGroup.kind === ChatbotGroup.USER_MESSAGES) {
+    // Change last message sent by user
+    const lastUserMessage =
+      lastMessageGroup.messages[lastMessageGroup.messages.length - 1]
+
+    lastUserMessage.text = recognitionResult.transcript!
+  }
+}
+
+const stopStreamingAudio = async () => {
+  await chatbotService.stopStreaming()
+
+  isStreaming.value = false
+}
+
+const toggleStreamingAudio = async () => {
+  if (isStreaming.value) {
+    await stopStreamingAudio()
+  } else {
+    await startStreamingAudio()
+  }
+}
 
 const positionCallback = (position: GeolocationPosition) => {
   location.value = toLatLngLiteral(position)
@@ -161,32 +292,11 @@ const addUserMessage = (message: ChatbotUserMessage) => {
     lastMessage.messages.push(message)
   }
 }
-
-const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
-  const lastMessage = chatMessages.value[messagesLength.value - 1]
-
-  // There are no messages or last message is message from user
-  if (!lastMessage || lastMessage.kind === ChatbotGroup.USER_MESSAGES) {
-    // Create user message group
-    const newUserMessageGroup: ChatbotReplyMessage[] = [replyMessage]
-
-    // Push new message group to messages array
-    chatMessages.value.push({
-      kind: ChatbotGroup.CHATBOT_REPLIES,
-      messages: newUserMessageGroup,
-    })
-
-    return
-  }
-
-  if (lastMessage.kind === ChatbotGroup.CHATBOT_REPLIES) {
-    // Push new message to message group
-    lastMessage.messages.push(replyMessage)
-  }
-}
 </script>
 
 <template>
+  <!-- The audio element where the response will get played -->
+  <audio ref="echoAudioRef" :src="echoURL" class="hidden" autoplay />
   <div class="flex-1 sm:p-6 justify-between flex flex-col h-screen">
     <div
       class="flex sm:items-center justify-between py-3 border-b-2 border-gray-200"
@@ -274,7 +384,8 @@ const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
     </div>
     <!-- <Messages> -->
     <div
-      class="flex flex-col justify-end h-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch"
+      ref="messagesPanelRef"
+      class="scrolling-touch flex flex-col space-y-4 p-3 max-h-full overflow-y-scroll mt-auto"
     >
       <template v-for="(messageGroup, index) in chatMessages" :key="index">
         <UserMessageGroup
@@ -305,6 +416,7 @@ const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
               class="i-mdi-steering"
               group-hover="scale-110"
               transition="ease-in-out duration-250"
+              @click="toggleStreamingAudio"
             ></div>
           </button>
         </span>
@@ -314,7 +426,7 @@ const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
           :placeholder="placeholder"
           class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3"
           @keydown.enter="detectInputText"
-          />
+        />
         <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
           <button
             type="button"

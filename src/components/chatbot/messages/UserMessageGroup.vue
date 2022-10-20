@@ -5,7 +5,7 @@ defineProps<{ messages: ChatbotUserMessage[], imgSrc: string }>()
 </script>
 
 <template>
-  <div class="chat-user-message-group">
+  <div class="chat-message-group user-group">
     <div class="flex items-end justify-end">
       <div
         class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end"

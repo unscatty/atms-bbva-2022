@@ -21,6 +21,10 @@ export default class ChatbotService {
         // eslint-disable-next-line no-unused-vars
         data: DialogFlowCX.IStreamingDetectIntentResponse
       ) => void
+      onRecognitionResult: (
+        // eslint-disable-next-line no-unused-vars
+        data: DialogFlowCX.IStreamingDetectIntentResponse
+      ) => void
     },
     recoderOptions: Partial<RecordRTC.Options> = { timeSlice: 250 }
   ) {
@@ -49,6 +53,12 @@ export default class ChatbotService {
     this.ioService.socketInstance.on(
       'stream-intent-matched',
       options.onIntentMatched
+    )
+
+    // Setup listener when backend responds with recognition result
+    this.ioService.socketInstance.on(
+      'stream-recognition-result',
+      options.onRecognitionResult
     )
 
     // Start the audio stream
