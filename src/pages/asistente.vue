@@ -62,8 +62,7 @@ const createBotReplies = (
 
       // Payload message
       if (message?.payload) {
-        const mapImageSrc =
-          message?.payload?.fields?.mapImageSrc?.stringValue
+        const mapImageSrc = message?.payload?.fields?.mapImageSrc?.stringValue
 
         if (mapImageSrc) {
           return {
@@ -297,7 +296,29 @@ const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
         <span class="absolute inset-y-0 flex items-center">
           <button
             type="button"
-            class="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none"
+            class="group inline-flex items-center justify-center rounded-full h-12 w-12 text-gray-500 focus:outline-none"
+            transition="duration-500 ease-in-out"
+            hover="bg-gray-300"
+          >
+            <!-- Sterring wheel icon -->
+            <div
+              class="i-mdi-steering"
+              group-hover="scale-110"
+              transition="ease-in-out duration-250"
+            ></div>
+          </button>
+        </span>
+        <input
+          v-model="userInput"
+          type="text"
+          :placeholder="placeholder"
+          class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3"
+          @keydown.enter="detectInputText"
+          />
+        <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
+          <button
+            type="button"
+            class="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -314,15 +335,6 @@ const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
               ></path>
             </svg>
           </button>
-        </span>
-        <input
-          v-model="userInput"
-          type="text"
-          :placeholder="placeholder"
-          class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3"
-          @keydown.enter="detectInputText"
-        />
-        <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
           <button
             type="button"
             class="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none"
@@ -428,10 +440,6 @@ const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
 
 .scrollbar-thumb-rounded::-webkit-scrollbar-thumb {
   border-radius: 0.25rem;
-}
-
-.chat-message {
-  font-size: 1.25rem;
 }
 </style>
 
