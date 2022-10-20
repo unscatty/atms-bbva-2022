@@ -1,21 +1,13 @@
 <script setup lang="ts">
 import ChatbotUserMessage from '~/models/chatbot/messages/user-message'
 import ChatbotReplyMessage from '~/models/chatbot/messages/reply-message'
-
-enum ChatbotGroup {
-  CHATBOT_REPLIES = 'CHATBOT_REPLIES',
-  USER_MESSAGES = 'USER_MESSAGES',
-}
-
-type ReplyGroup = {
-  kind: ChatbotGroup.CHATBOT_REPLIES
-  messages: ChatbotReplyMessage[]
-}
-
-type UserGroup = {
-  kind: ChatbotGroup.USER_MESSAGES
-  messages: ChatbotUserMessage[]
-}
+import {
+  ChatbotGroup,
+  ReplyGroup,
+  UserGroup,
+} from '~/models/chatbot/messages/helper-types'
+import { defaultChatbotService as chatbotService } from '~/services/chatbot.service'
+import { toLatLngLiteral } from '../utils/geolocation'
 
 const userInput = ref('')
 const placeholder = 'Escribe un mensaje'
@@ -24,73 +16,113 @@ const defaultUserImage =
 const defaultBotImage =
   'https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144'
 
-const chatMessages = ref<Array<UserGroup | ReplyGroup>>([
-  // {
-  //   kind: ChatbotGroup.USER_MESSAGES,
-  //   messages: [
-  //     {
-  //       text: 'Hola quiero saber todo',
-  //       timestamp: new Date(),
-  //     },
-  //     {
-  //       text: 'Por favor',
-  //       timestamp: new Date(),
-  //     },
-  //   ],
-  // },
-  // {
-  //   kind: ChatbotGroup.CHATBOT_REPLIES,
-  //   messages: [
-  //     {
-  //       text: 'OK',
-  //       timestamp: new Date(),
-  //     },
-  //     {
-  //       text: 'Te lo diré',
-  //       timestamp: new Date(),
-  //     },
-  //   ],
-  // },
-  // {
-  //   kind: ChatbotGroup.USER_MESSAGES,
-  //   messages: [
-  //     {
-  //       text: 'Gracias tkm',
-  //       timestamp: new Date(),
-  //     },
-  //   ],
-  // },
-])
+const chatMessages = ref<Array<UserGroup | ReplyGroup>>([])
 
 const messagesLength = computed(() => chatMessages.value.length)
 
-const mockupMessage = () => {
-  const userTextInput = userInput.value
+const location = ref<google.maps.LatLngLiteral>()
 
-  if (userTextInput.startsWith('reply:')) {
-    addBotReplyMessage({
-      text: userTextInput.replace('reply:', ''),
-      timestamp: new Date(),
-    })
-  } else {
-    addUserMessage({
-      text: userTextInput,
-      timestamp: new Date(),
-    })
-  }
+onMounted(() => {
+  getLocation()
+})
 
-  userInput.value = ''
+const positionCallback = (position: GeolocationPosition) => {
+  location.value = toLatLngLiteral(position)
+
+  console.log('location has changed')
 }
 
-const createUserMessage = () => {
-  const userTextInput = userInput.value
+const getLocation = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(positionCallback, console.error)
+  }
+}
 
+const createUserMessage = (text: string) => {
   addUserMessage({
-    text: userTextInput,
+    text,
     timestamp: new Date(),
   })
+}
+
+const createBotReplies = (
+  messages: DialogFlowCX.IResponseMessage[] | null | undefined
+) => {
+  if (!messages) return
+
+  // Create a new chatbot reply group with responses
+  const botReplies = messages
+    .map((message): ChatbotReplyMessage | undefined => {
+      if (message?.text?.text) {
+        return {
+          text: message.text?.text?.join('\n'),
+          timestamp: new Date(),
+        }
+      }
+    })
+    .filter(Boolean)
+
+  // Add group to messages
+  const lastMessage = chatMessages.value[messagesLength.value - 1]
+
+  // There are no messages or last message is message from user
+  if (!lastMessage || lastMessage.kind === ChatbotGroup.USER_MESSAGES) {
+    // Create new chatbot reply group
+    const newBotReplyGroup: ReplyGroup = {
+      kind: ChatbotGroup.CHATBOT_REPLIES,
+      // falsy values already removed
+      messages: botReplies as ChatbotReplyMessage[],
+    }
+    // Push new message group to messages array
+    chatMessages.value.push(newBotReplyGroup)
+
+    return
+  }
+
+  if (lastMessage.kind === ChatbotGroup.CHATBOT_REPLIES) {
+    // Push messages to existing group
+    lastMessage.messages.push(...(botReplies as ChatbotReplyMessage[]))
+  }
+}
+
+const detectInputText = async () => {
+  const userTextInput = userInput.value
+
+  if (!userTextInput) return
+
+  createUserMessage(userTextInput)
 
   userInput.value = ''
+
+  const detectRequest: DialogFlowCX.IDetectIntentRequest = {
+    queryParams: {
+      payload: {
+        fields: {
+          location: {
+            structValue: {
+              fields: {
+                lat: {
+                  numberValue: location.value?.lat,
+                },
+                lng: {
+                  numberValue: location.value?.lng,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    queryInput: {
+      text: {
+        text: userTextInput,
+      },
+    },
+  }
+
+  const response = await chatbotService.detectIntent(detectRequest)
+
+  createBotReplies(response?.queryResult?.responseMessages)
 }
 
 const addUserMessage = (message: ChatbotUserMessage) => {
@@ -114,8 +146,6 @@ const addUserMessage = (message: ChatbotUserMessage) => {
     // Push new message to message group
     lastMessage.messages.push(message)
   }
-
-  console.log(lastMessage)
 }
 
 const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
@@ -124,7 +154,7 @@ const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
   // There are no messages or last message is message from user
   if (!lastMessage || lastMessage.kind === ChatbotGroup.USER_MESSAGES) {
     // Create user message group
-    const newUserMessageGroup: ChatbotUserMessage[] = [replyMessage]
+    const newUserMessageGroup: ChatbotReplyMessage[] = [replyMessage]
 
     // Push new message group to messages array
     chatMessages.value.push({
@@ -275,7 +305,7 @@ const addBotReplyMessage = (replyMessage: ChatbotReplyMessage) => {
           type="text"
           :placeholder="placeholder"
           class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-md py-3"
-          @keydown.enter="mockupMessage"
+          @keydown.enter="detectInputText"
         />
         <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
           <button

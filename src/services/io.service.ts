@@ -1,7 +1,6 @@
 import { io, Socket } from 'socket.io-client'
 // import * as ss from '~/libs/node-socketio-stream'
 
-
 // Service used to comunicate with server via Socket.io
 export default class IOService {
   socket: Socket
@@ -34,6 +33,13 @@ export default class IOService {
         reject(error)
       }
     })
+  }
+
+  async emitIntentRequest(
+    event: string,
+    request: DialogFlowCX.IDetectIntentRequest
+  ) {
+    return this.emitAsync<DialogFlowCX.IDetectIntentResponse>(event, request)
   }
 
   async emitText<T>(event: string, text: string) {

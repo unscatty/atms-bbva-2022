@@ -63,9 +63,13 @@ export default class ChatbotService {
 
   async sendTextMessage(text: string) {
     return this.ioService.emitText<DialogFlowCX.IDetectIntentResponse>(
-      'detect-intent',
+      'detect-intent-text',
       text
     )
+  }
+
+  async detectIntent(request: DialogFlowCX.IDetectIntentRequest) {
+    return this.ioService.emitIntentRequest('detect-intent', request)
   }
 
   async pauseStreaming() {
@@ -75,4 +79,12 @@ export default class ChatbotService {
   async resumeStreaming() {
     return this.recorder?.recorderInstance?.resumeRecording()
   }
+
+  async stopStreaming() {
+    await this.recorder?.stopRecording()
+
+    this.ioService.socketInstance.emit('stop-streaming-audio')
+  }
 }
+
+export const defaultChatbotService = new ChatbotService()

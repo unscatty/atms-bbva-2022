@@ -7,7 +7,7 @@ defineProps<{ message: ChatbotReplyMessage }>()
 <template>
   <div>
     <span
-      class="px-4 py-2 rounded-lg inline-block bg-gray-300 text-gray-600 md:text-sm"
+      class="px-4 py-2 rounded-lg inline-block bg-gray-300 text-gray-600 md:text-sm text-left"
     >
       <template v-if="message.mapImageSrc">
         <img :src="message.mapImageSrc" alt="ruta" />
