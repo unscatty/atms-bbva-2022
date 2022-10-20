@@ -59,6 +59,19 @@ const createBotReplies = (
           timestamp: new Date(),
         }
       }
+
+      // Payload message
+      if (message?.payload) {
+        const mapImageSrc =
+          message?.payload?.fields?.mapImageSrc?.stringValue
+
+        if (mapImageSrc) {
+          return {
+            mapImageSrc,
+            timestamp: new Date(),
+          }
+        }
+      }
     })
     .filter(Boolean)
 
@@ -121,6 +134,8 @@ const detectInputText = async () => {
   }
 
   const response = await chatbotService.detectIntent(detectRequest)
+
+  console.debug(response)
 
   createBotReplies(response?.queryResult?.responseMessages)
 }

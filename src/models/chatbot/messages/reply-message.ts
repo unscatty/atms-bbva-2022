@@ -1,5 +1,5 @@
 export default interface ChatbotReplyMessage {
-  text: string
+  text?: string
   mapImageSrc?: string
   timestamp: Date
 }
