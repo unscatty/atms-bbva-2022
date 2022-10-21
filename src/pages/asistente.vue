@@ -413,7 +413,7 @@ const addUserMessage = (message: ChatbotUserMessage) => {
           >
             <!-- Sterring wheel icon -->
             <div
-              class="i-mdi-steering"
+              class="i-mdi-steering text-2xl"
               group-hover="scale-110"
               transition="ease-in-out duration-250"
               @click="toggleStreamingAudio"

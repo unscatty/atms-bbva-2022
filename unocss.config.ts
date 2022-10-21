@@ -24,7 +24,7 @@ export default defineConfig({
     presetUno(),
     presetAttributify(),
     presetIcons({
-      scale: 2,
+      scale: 1.25,
       warn: true,
     }),
     presetTypography(),
