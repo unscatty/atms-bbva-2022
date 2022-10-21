@@ -8,9 +8,6 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     ATMInfo: typeof import('./components/main-page/ATMInfo.vue')['default']
-    ChatbotMessage: typeof import('./components/chatbot/messages/ChatbotReplyMessage.vue')['default']
-    ChatbotReplyGroup: typeof import('./components/chatbot/messages/ChatbotReplyGroup.vue')['default']
-    ChatbotReplyMessage: typeof import('./components/chatbot/messages/ChatbotReplyMessage.vue')['default']
     Counter: typeof import('./components/Counter.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
     InfoDialog: typeof import('./components/InfoDialog.vue')['default']

@@ -2,7 +2,8 @@
 import { GoogleMap, Marker } from 'vue3-google-map'
 import type { ATM } from '~/models/atm/atm'
 import { atmToLatLngLiteral } from '~/models/atm/atm'
-import atmService from '~/services/atms/api/api-atm.service'
+// import atmService from '~/services/atms/api/api-atm.service'
+import { defaultATMService as atmService } from '~/services/atms/atm.service'
 import { toLatLngLiteral } from '~/utils/geolocation'
 import styles from '~/styles/map-style'
 
@@ -56,8 +57,11 @@ const getLocation = () => {
 const getNearATMs = async (location: google.maps.LatLngLiteral) => {
   const bounds = new google.maps.LatLngBounds()
 
+  // Add user location
+  bounds.extend(center.value)
+
   try {
-    atmLocations.value = await atmService.getATMs(location)
+    atmLocations.value = await atmService.getClosestATMs(location, 10)
 
     atmLocations.value.forEach((atm) => bounds.extend(atmToLatLngLiteral(atm)))
   } catch (error) {
@@ -150,7 +154,7 @@ watch(
       <div class="btn m-2" @click="getLocation">Actualizar ubicación</div>
       <div class="btn m-2" @click="getNearATMs(center)">Cajeros cercanos</div>
       <div class="btn m-2" @click="getRoute()">Mostrar ruta</div>
-      <!-- <div class="btn" @click="calculateDistance">Calculate distance</div> -->
+      <RouterLink to="/asistente" class="btn m-2">Asistente</RouterLink>
     </div>
   </div>
 </template>

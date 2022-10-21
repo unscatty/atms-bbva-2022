@@ -1,8 +1,8 @@
 import { ApiATM, toATM } from '~/models/atms-api/api-atm'
-import { IATMService } from '../atm.service'
+import IATMService from '../atm.service.interface'
 
 export class ApiATMService implements IATMService {
-  async getATMs(location: google.maps.LatLngLiteral) {
+  async getClosestATMs(location: google.maps.LatLngLiteral) {
     const now = new Date()
 
     const bodyParams: Record<string, any> = {
@@ -41,6 +41,12 @@ export class ApiATMService implements IATMService {
     const data = (await apiResponse.json()).Obj as ApiATM[]
 
     return data.map((apiATM) => toATM(apiATM))
+  }
+
+  async getClosestATM(userLocation: google.maps.LatLngLiteral) {
+    const atms = await this.getClosestATMs(userLocation)
+
+    return atms[0]
   }
 }
 

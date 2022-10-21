@@ -11,8 +11,9 @@ defineProps<{ message: ChatbotReplyMessage }>()
     >
       <template v-if="message.mapImageSrc">
         <img :src="message.mapImageSrc" alt="ruta" />
-        <br />
       </template>
+
+      <br v-if="message.mapImageSrc && message.text" />
 
       {{ message.text }}
     </span>

@@ -2,14 +2,12 @@ import {
   FirebaseApp,
   FirebaseAppSettings,
   FirebaseOptions,
-  initializeApp,
+  initializeApp
 } from 'firebase/app'
 import {
   collection,
   CollectionReference,
-  doc,
-  DocumentSnapshot,
-  Firestore,
+  doc, Firestore,
   getDoc,
   getDocs,
   getFirestore,
@@ -18,7 +16,7 @@ import {
   query,
   QuerySnapshot,
   setDoc,
-  where,
+  where
 } from 'firebase/firestore'
 import { ATMUserReport } from '../models/atm-user-report'
 

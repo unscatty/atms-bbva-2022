@@ -16,8 +16,14 @@ export interface ATM {
   // Delegación/Municipio
   delMuni?: string
   colonia?: string
-  latitud?: number
-  longitud?: number
+  latitud?: number | string
+  longitud?: number | string
+  tipoLocalidad?: string
+  idc?: string
+  etv?: string
+
+  // Distance (in straight line) calculated from BigQuery
+  straight_distance?: number
 }
 
 export const generateDescriptions = (
@@ -54,7 +60,10 @@ export const generateDescriptions = (
 }
 
 export const atmToLatLngLiteral = (atm: ATM): google.maps.LatLngLiteral => {
-  return { lat: atm.latitud || 0, lng: atm.longitud || 0 }
+  return {
+    lat: parseFloat(atm.latitud?.toString() || ''),
+    lng: parseFloat(atm.longitud?.toString() || ''),
+  }
 }
 
 export const atmToLatLng = (atm: ATM): google.maps.LatLng => {
