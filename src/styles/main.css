@@ -27,3 +27,15 @@ body,
   width: 100%;
   height: 2px;
 }
+
+@media (min-width: 768px) {
+  .heightWithoutNavbar {
+    height: calc(100vh - 66px);
+    margin-top: 66px;
+  }
+}
+
+
+.scrollbarHidden::-webkit-scrollbar {
+  display: none;
+}
