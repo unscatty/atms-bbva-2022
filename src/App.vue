@@ -3,7 +3,7 @@
 // you can use this to manipulate the document head in any components,
 // they will be rendered correctly in the html results with vite-ssg
 useHead({
-  title: 'ATM Finder',
+  title: 'ATM Easy Finder',
   meta: [
     { name: 'description', content: 'BBVA 2022' },
     // {

@@ -108,8 +108,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'safari-pinned-tab.svg'],
       manifest: {
-        name: 'ATM Finder',
-        short_name: 'ATM Finder',
+        name: 'ATM Easy Finder',
+        short_name: 'ATM Easy Finder',
         theme_color: '#ffffff',
         icons: [
           {
