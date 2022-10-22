@@ -11,12 +11,16 @@ defineProps<{ title: string; show: boolean }>()
 const emit = defineEmits(['close'])
 
 const close = () => emit('close')
+
+
+
 </script>
 
 <template>
   <TransitionRoot as="template" :show="show">
     <ModalDialog as="div" class="fixed inset-0 overflow-hidden" @close="close">
-      <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute inset-0 overflow-hidden h-100vh">
+        <!-- https://pr1.nicelocal.com.mx/MTxp7ucjC9wfA7uB3GpXvw/1280x720,q85/4px-BW84_n0QJGVPszge3NRBsKw-2VcOifrJIjPYFYkOtaCZxxXQ2ZQuIUACsUll0sz6N9tBE4x2xAUZ82C250mTSD4ma7Fn0Yoc3WwtQwga72mWVUaMfA -->
         <TransitionChild
           as="template"
           enter="ease-in-out duration-500"
@@ -31,7 +35,7 @@ const close = () => emit('close')
           />
         </TransitionChild>
         <div
-          class="pointer-events-none fixed flex max-w-full w-full bottom-0 md:inset-y-0 md:right-0 md:flex-row-reverse"
+          class="pointer-events-none fixed flex max-w-full w-full bottom-0 md:inset-y-0 md:right-0 md:flex-row-reverse "
         >
           <TransitionChild
             as="template"
@@ -44,32 +48,14 @@ const close = () => emit('close')
           >
             <div class="pointer-events-auto relative w-full md:w-100">
               <div
-                class="h-full overflow-y-auto bg-white p-8 rounded-t-5 md:rounded-none"
+                class="h-full overflow-y-auto bg-white rounded-t-5 md:rounded-none"
               >
-                <div class="space-y-6 pb-16">
-                  <div>
-                    <div class="mt-4 flex items-start justify-between">
-                      <div>
-                        <!-- Title -->
-                        <h2 class="text-lg font-medium text-gray-900">
-                          {{ title }}
-                        </h2>
-                        <!-- <p class="text-sm font-medium text-gray-500">3.9 MB</p> -->
-                      </div>
-                    </div>
-                  </div>
+                <div class="">
+                  
                   <!-- Component -->
-                  <slot></slot>
+                  <slot @close="close"></slot>
 
-                  <div class="flex">
-                    <button
-                      type="button"
-                      class="flex-1 rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      @click="close"
-                    >
-                      OK
-                    </button>
-                  </div>
+                  
                 </div>
               </div>
             </div>
