@@ -172,7 +172,7 @@ watch(
       :show="modalOpen"
       @close="closeATMInfo"
     >
-      <ATMInfo :atm="selectedATM!" />
+      <ATMInfo :atm="selectedATM!" @close="closeATMInfo" />
     </InfoDialog>
   </GoogleMap>
 </template>

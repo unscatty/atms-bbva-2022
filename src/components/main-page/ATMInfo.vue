@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { ATM, generateDescriptions } from '~/models/atm/atm'
 
-
-
 defineProps<{ atm: ATM }>()
 
-
-
+const emit = defineEmits(['close'])
 </script>
 
 <template>
@@ -76,16 +73,12 @@ defineProps<{ atm: ATM }>()
             <div
               class="flex-1 text-black flex items-center rounded p-2 justify-center bg-light-blue-200"
             >
-              <div class="i-mdi:walk"> 
-
-              </div>
+              <div class="i-mdi:walk"></div>
             </div>
             <div
               class="flex-1 text-black flex items-center rounded justify-center bg-light-blue-200"
             >
-              <div class="i-mdi:car">
-
-              </div>
+              <div class="i-mdi:car"></div>
             </div>
             <div
               class="flex-1 text-black flex items-center rounded justify-center bg-light-blue-200"
@@ -117,7 +110,7 @@ defineProps<{ atm: ATM }>()
       <button
         type="button"
         class="flex-auto rounded-md border border-transparent bg-indigo-600 py-2 mx-8 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        @click="$parent.$emit('close')"
+        @click="emit('close')"
       >
         OK
       </button>
