@@ -25,7 +25,7 @@ const navigationResources = [
   {
     name: 'Asistente ATM',
     to: '/asistente',
-    icon: 'i-heroicons-chat-bubble-bottom-center-text-20-solid',
+    icon: 'i-bxs-bot',
   },
 ]
 </script>

@@ -9,6 +9,7 @@ specifiers:
   '@antfu/eslint-config': ^0.27.0
   '@google-cloud/dialogflow-cx': ^3.1.1
   '@headlessui/vue': ^1.7.3
+  '@iconify-json/bxs': ^1.1.4
   '@iconify-json/carbon': ^1.1.8
   '@iconify-json/heroicons': ^1.1.5
   '@iconify-json/mdi': ^1.1.34
@@ -89,6 +90,7 @@ dependencies:
 
 devDependencies:
   '@antfu/eslint-config': 0.27.0_z4bbprzjrhnsfa24uvmcbu7f5q
+  '@iconify-json/bxs': 1.1.4
   '@iconify-json/carbon': 1.1.8
   '@iconify-json/heroicons': 1.1.5
   '@iconify-json/mdi': 1.1.34
@@ -2020,6 +2022,12 @@ packages:
 
   /@humanwhocodes/object-schema/1.2.1:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
+    dev: true
+
+  /@iconify-json/bxs/1.1.4:
+    resolution: {integrity: sha512-iK2shn6bzkQRhoGvsvcnUASeXeRunKPs+2gtmJt6uR5byIcTxypdnnstVOTAeLa5pkAym3/NKJh5tDvNs/8e1w==}
+    dependencies:
+      '@iconify/types': 2.0.0
     dev: true
 
   /@iconify-json/carbon/1.1.8:
