@@ -53,8 +53,8 @@ const emit = defineEmits(['close'])
           leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
           <div
-            class="relative inline-block align-middle bg-white rounded-lg p-2 max-w-full w-full text-left overflow-hidden shadow-xl transform transition-all"
-            sm="w-90% my-8 p-6"
+            class="relative inline-block align-middle bg-white rounded-lg p-2 max-w-full w-fit text-left overflow-hidden shadow-xl transform transition-all"
+            sm="my-8 p-6"
           >
             <img :src="imageSrc" alt="" class="min-w-full" />
             <div></div>

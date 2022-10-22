@@ -108,8 +108,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'safari-pinned-tab.svg'],
       manifest: {
-        name: 'ATM Explorer',
-        short_name: 'ATM',
+        name: 'ATM Finder',
+        short_name: 'ATM Finder',
         theme_color: '#ffffff',
         icons: [
           {
@@ -170,25 +170,25 @@ export default defineConfig({
   },
 
   build: {
-    rollupOptions: {
-      output: {
-        plugins: [
-          // <-- use plugins inside output to not merge chunks on one file
-          obfuscate({
-            globalOptions: {
-              transformObjectKeys: true,
-              unicodeEscapeSequence: true,
-              numbersToExpressions: true,
-              shuffleStringArray: true,
-              splitStrings: false,
-              stringArrayThreshold: 1,
-              identifierNamesGenerator: 'hexadecimal',
-              stringArray: false,
-            },
-          }),
-        ],
-      },
-    },
+    // rollupOptions: {
+    //   output: {
+    //     plugins: [
+    //       // <-- use plugins inside output to not merge chunks on one file
+    //       obfuscate({
+    //         globalOptions: {
+    //           transformObjectKeys: true,
+    //           unicodeEscapeSequence: true,
+    //           numbersToExpressions: true,
+    //           shuffleStringArray: true,
+    //           splitStrings: false,
+    //           stringArrayThreshold: 1,
+    //           identifierNamesGenerator: 'hexadecimal',
+    //           stringArray: false,
+    //         },
+    //       }),
+    //     ],
+    //   },
+    // },
     minify: 'esbuild',
     target: 'es2015',
     terserOptions: {
