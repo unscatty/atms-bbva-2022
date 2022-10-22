@@ -15,7 +15,7 @@ const close = () => emit('close')
 
 <template>
   <TransitionRoot as="template" :show="show">
-    <ModalDialog as="div" class="fixed inset-0 overflow-hidden" @close="close">
+    <ModalDialog as="div" class="fixed inset-0 overflow-hidden z-9999" @close="close">
       <div class="absolute inset-0 overflow-hidden">
         <TransitionChild
           as="template"
