@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GoogleMap, Marker } from 'vue3-google-map'
+import { GoogleMap, Marker, CustomMarker } from 'vue3-google-map'
 import type { ATM } from '~/models/atm/atm'
 import { atmToLatLngLiteral } from '~/models/atm/atm'
 // import atmService from '~/services/atms/api/api-atm.service'
@@ -19,6 +19,9 @@ const currentPosition = ref<GeolocationPosition>()
 
 let directionsServices: google.maps.DirectionsService
 let directionsRenderer: google.maps.DirectionsRenderer
+
+// The bounds for the atms markers
+let bounds: google.maps.LatLngBounds
 
 // const distanceAPI = ref(0)
 let atmLocations = ref<ATM[]>([])
@@ -40,6 +43,8 @@ const init = () => {
   directionsServices = new google.maps.DirectionsService()
   directionsRenderer = new google.maps.DirectionsRenderer()
   directionsRenderer.setMap(gmaps.value?.map || null)
+
+  bounds = new google.maps.LatLngBounds()
 }
 
 const getLocation = () => {
@@ -52,10 +57,15 @@ const getLocation = () => {
       }
     )
   }
+
+  if (bounds && !bounds.isEmpty()) {
+    gmaps.value?.map?.fitBounds(bounds)
+    gmaps.value?.map?.panToBounds(bounds)
+  }
 }
 
 const getNearATMs = async (location: google.maps.LatLngLiteral) => {
-  const bounds = new google.maps.LatLngBounds()
+  bounds = new google.maps.LatLngBounds()
 
   // Add user location
   bounds.extend(center.value)
@@ -132,19 +142,30 @@ watch(
     :zoom="15"
     :styles="styles"
     language="es-MX"
+    :street-view-control="false"
   >
-    <!-- @load="onMapsLoaded" -->
-    <Marker
+    <CustomMarker
       :options="{
         position: center,
+        anchorPoint: 'BOTTOM_CENTER',
       }"
-    />
-    <Marker
+    >
+      <div class="i-mdi-map-marker-account text-[2.5rem] text-rose-5"></div>
+    </CustomMarker>
+    <CustomMarker
       v-for="(location, index) in atmLocations"
       :key="index"
-      :options="{ position: atmToLatLngLiteral(location) }"
+      :options="{
+        position: atmToLatLngLiteral(location),
+        anchorPoint: 'BOTTOM_CENTER',
+      }"
       @click="showATMInfo(location)"
-    />
+    >
+      <div class="i-mdi-map-marker-radius text-blue-9 text-4xl"></div>
+      <div
+        class="i-mdi-atm text-blue-9 text-3xl relative -top-17 left-0.65"
+      ></div>
+    </CustomMarker>
 
     <InfoDialog
       title="Cajero Automático"
