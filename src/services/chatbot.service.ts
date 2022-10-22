@@ -101,6 +101,10 @@ export default class ChatbotService {
     await this.recorder?.stopRecording()
 
     this.ioService.socketInstance.emit('stop-streaming-audio')
+
+    // Remove listeners
+    this.ioService.socketInstance.removeListener('stream-intent-matched')
+    this.ioService.socketInstance.removeListener('stream-recognition-result')
   }
 }
 
