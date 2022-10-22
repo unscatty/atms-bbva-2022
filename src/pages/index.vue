@@ -154,14 +154,6 @@ watch(
       <ATMInfo :atm="selectedATM!" />
     </InfoDialog>
   </GoogleMap>
-  <div class="fixed bottom-0 w-full">
-    <div class="flex-inline items-center m-auto justify-start">
-      <div class="btn m-2" @click="getLocation">Actualizar ubicación</div>
-      <div class="btn m-2" @click="getNearATMs(center)">Cajeros cercanos</div>
-      <div class="btn m-2" @click="getRoute()">Mostrar ruta</div>
-      <RouterLink to="/asistente" class="btn m-2">Asistente</RouterLink>
-    </div>
-  </div>
 </template>
 
 <route lang="yaml">
