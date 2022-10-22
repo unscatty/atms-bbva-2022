@@ -82,6 +82,13 @@ export default class ChatbotService {
     return this.ioService.emitIntentRequest('detect-intent', request)
   }
 
+  async restartConversation() {
+    return this.ioService.emitAsync<DialogFlowCX.IDetectIntentResponse>(
+      'reset-conversation',
+      ''
+    )
+  }
+
   async pauseStreaming() {
     return this.recorder?.recorderInstance?.pauseRecording()
   }

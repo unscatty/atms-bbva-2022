@@ -23,10 +23,10 @@ export default class IOService {
     this.socket.emit(event, blob)
   }
 
-  async emitAsync<T>(...args: Parameters<InstanceType<typeof Socket>['emit']>) {
-    return new Promise<T>((resolve, reject) => {
+  async emitAsync<ResponseType>(...args: Parameters<InstanceType<typeof Socket>['emit']>) {
+    return new Promise<ResponseType>((resolve, reject) => {
       try {
-        this.socket.emit(args[0], ...args.slice(1), (response: T) => {
+        this.socket.emit(args[0], ...args.slice(1), (response: ResponseType) => {
           resolve(response)
         })
       } catch (error) {
