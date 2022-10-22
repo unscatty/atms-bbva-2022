@@ -6,10 +6,10 @@ useHead({
   title: 'ATMs',
   meta: [
     { name: 'description', content: 'BBVA 2022' },
-    {
-      name: 'theme-color',
-      content: computed(() => isDark.value ? '#00aba9' : '#ffffff'),
-    },
+    // {
+    //   name: 'theme-color',
+    //   content: computed(() => isDark.value ? '#00aba9' : '#ffffff'),
+    // },
   ],
   link: [
     {
