@@ -246,6 +246,7 @@ const streamAudioRTC = async () => {
 
 <template>
   <div>
+    <FlyoutMenu />
     <!-- <audio :src="recordDataURL" controls></audio> -->
     <audio
       ref="echoAudioRef"

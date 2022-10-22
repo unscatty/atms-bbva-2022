@@ -119,10 +119,15 @@ watch(
 </script>
 
 <template>
+  <FlyoutMenu
+    :is-home-page="true"
+    @nearby-atms="getNearATMs(center)"
+    @update-location="getLocation"
+  />
   <GoogleMap
     ref="gmaps"
     :api-key="API_KEY"
-    class="absolute w-full h-full"
+    class="absolute w-full h-full bottom-0"
     :center="center"
     :zoom="15"
     :styles="styles"

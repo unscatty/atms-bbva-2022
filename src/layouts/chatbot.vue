@@ -1,5 +1,6 @@
 <template>
-  <main class="xl:px-64 text-center text-gray-700 dark:text-gray-200">
+  <main class="xl:px-64 text-center text-gray-700 dark:text-gray-200 h-screen">
+    <!-- <FlyoutMenu /> -->
     <RouterView />
   </main>
 </template>

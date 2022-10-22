@@ -298,6 +298,7 @@ const addUserMessage = (message: ChatbotUserMessage) => {
   <!-- The audio element where the response will get played -->
   <audio ref="echoAudioRef" :src="echoURL" class="hidden" autoplay />
   <div class="flex-1 sm:p-6 justify-between flex flex-col h-screen">
+    <FlyoutMenu />
     <div
       class="flex sm:items-center justify-between py-3 border-b-2 border-gray-200"
     >
