@@ -3,12 +3,18 @@
 import { Unsubscribe } from 'firebase/firestore'
 import { ATM } from '~/models/atm/atm'
 import { defaultFirestoreService as alertService } from '~/services/firestore.service'
-import { ATMUserReport } from '~/models/atm-user-report'
+import {
+  ATMUserReport,
+  ATMUserReportKind,
+  generateDescriptionTitle,
+} from '~/models/atm-user-report'
 
 const props = defineProps<{ atm: ATM }>()
 
 const atmAlerts = ref<{ id: string; data: ATMUserReport }[]>([])
 const unsuscribe = ref<Unsubscribe>()
+
+const newReportKind = ref<ATMUserReportKind>(ATMUserReportKind.NOT_WORKING)
 
 onMounted(async () => {
   // Get the alerts for this atm
@@ -94,35 +100,40 @@ const closeAlert = () => {
         <label for="location" class="block text-sm font-medium text-gray-700"
           >Cajero</label
         >
-        <select
-          id="location"
-          name="location"
-          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-        >
-          <option selected="">{{ atm.sitio }}</option>
-        </select>
+        {{ atm.sitio }}
       </div>
       <div class="pb-4">
         <label for="location" class="block text-sm font-medium text-gray-700"
           >Tipo</label
         >
-        <select
-          id="location"
-          name="location"
-          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-        >
-          <option selected="" value="Sugerencia" class="text-black">
-            Sugerencia
-          </option>
-          <option selected="" value="Advertencia" class="text-black">
-            Advertencia
-          </option>
-        </select>
+        <div class="space-y-4">
+          <div
+            v-for="reportKind in Object.values(ATMUserReportKind)"
+            :key="reportKind"
+            class="flex items-center"
+          >
+            <input
+              :id="reportKind"
+              v-model="newReportKind"
+              name="notification-method"
+              type="radio"
+              :value="reportKind"
+              :checked="reportKind === ATMUserReportKind.NOT_WORKING"
+              class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+            />
+            <label
+              :for="reportKind"
+              class="ml-3 block text-sm font-medium text-gray-700"
+            >
+              {{ generateDescriptionTitle(reportKind) }}
+            </label>
+          </div>
+        </div>
       </div>
       <div pb-4>
-        <label for="comment" class="block text-sm font-medium text-gray-700"
-          >Agrega tu alerta</label
-        >
+        <label for="comment" class="block text-sm font-medium text-gray-700">
+          Agrega una descripción
+        </label>
         <div class="mt-1">
           <textarea
             id="comment"

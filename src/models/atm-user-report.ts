@@ -2,6 +2,7 @@
 export enum ATMUserReportKind {
   NO_CASH = 'NO_CASH',
   NOT_WORKING = 'NOT_WORKING',
+  TOO_MUCH_PEOPLE = 'TOO_MUCH_PEOPLE',
   OTHER = 'OTHER',
 }
 
@@ -19,7 +20,9 @@ export const generateDescriptionTitle = (alertKind: ATMUserReportKind) => {
       return 'No está en funcionamiento'
     case ATMUserReportKind.NO_CASH:
       return 'Sin efectivo'
+    case ATMUserReportKind.TOO_MUCH_PEOPLE:
+      return 'Hay demasiadas personas'
     default:
-      return 'Hay problemas'
+      return 'Otro'
   }
 }
