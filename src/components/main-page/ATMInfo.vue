@@ -5,7 +5,6 @@ import { ref } from 'vue'
 
 defineProps<{ atm: ATM }>()
 
-<<<<<<< Updated upstream
 const emit = defineEmits<{
   (e: 'close'): void
   (
@@ -35,8 +34,7 @@ const travelButtons: Array<{
     icon: 'i-mdi:bicycle',
   },
 ]
-=======
-const emit = defineEmits(['close'])
+// const emit = defineEmits(['close'])
 const alert = ref(false)
 
 const createAlert = () => {
@@ -46,7 +44,6 @@ const createAlert = () => {
 const closeAlert = () => {
   alert.value = false
 }
->>>>>>> Stashed changes
 </script>
 
 <template>
@@ -93,18 +90,18 @@ const closeAlert = () => {
         >
         <div class="mt-1">
           <textarea
+            id="comment"
             rows="4"
             name="comment"
-            id="comment"
             class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2"
           />
         </div>
       </div>
       <div class="flex justify-end gap-4">
         <button
-          @click="closeAlert"
           type="button"
           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          @click="closeAlert"
         >
           Cancelar
         </button>
@@ -208,7 +205,9 @@ const closeAlert = () => {
       </div>
     </div>
 
-    <div class="flex flex-col flex-1 overflow-y-scroll px-8 pb-4 grid gap-4 scrollbarHidden">
+    <div
+      class="flex flex-col flex-1 overflow-y-scroll px-8 pb-4 grid gap-4 scrollbarHidden"
+    >
       <Alert />
     </div>
 

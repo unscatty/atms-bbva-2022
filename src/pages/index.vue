@@ -140,10 +140,10 @@ watch(
   <div class="bakcground">
     <div class="container">
       <div>
-        <img class="aIntro" src="../assets/img/A.svg" alt="" />
+        <img class="aIntro" src="/svgs/A.svg" alt="" />
       </div>
       <div>
-        <img class="bbvIntro" src="../assets/img/BBV.svg" alt="" />
+        <img class="bbvIntro" src="/svgs/BBV.svg" alt="" />
       </div>
     </div>
   </div>
