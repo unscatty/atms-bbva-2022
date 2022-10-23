@@ -1,8 +1,44 @@
 <!-- eslint-disable no-unused-vars -->
 <script setup lang="ts">
-import { ATM, generateDescriptions } from '~/models/atm/atm'
+import { Unsubscribe } from 'firebase/firestore'
+import { ATM } from '~/models/atm/atm'
+import { defaultFirestoreService as alertService } from '~/services/firestore.service'
+import { ATMUserReport } from '~/models/atm-user-report'
 
-defineProps<{ atm: ATM }>()
+const props = defineProps<{ atm: ATM }>()
+
+const atmAlerts = ref<{ id: string; data: ATMUserReport }[]>([])
+const unsuscribe = ref<Unsubscribe>()
+
+onMounted(async () => {
+  // Get the alerts for this atm
+  const snapshot = await alertService.getAllReportsForAtm(props.atm.id!)
+  atmAlerts.value = snapshot.map((doc) => {
+    return {
+      id: doc.id,
+      data: doc.data(),
+    }
+  })
+
+  // Set listener for new alerts for this atm
+  unsuscribe.value = alertService.setOnReportsUpdate(
+    props.atm.id!,
+    (snapshot) => {
+      atmAlerts.value = snapshot.docs.map((doc) => {
+        return {
+          id: doc.id,
+          data: doc.data(),
+        }
+      })
+    }
+  )
+})
+
+onUnmounted(() => {
+  if (unsuscribe.value) {
+    unsuscribe.value()
+  }
+})
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -124,7 +160,9 @@ const travelButtons: Array<{
     </div>
 
     <div class="flex-1 overflow-y-scroll px-8 pb-4 grid gap-4 scrollbarHidden">
-      <Alert />
+      <div v-for="alert in atmAlerts" :key="alert.id">
+        <Alert :alert="alert.data" />
+      </div>
     </div>
 
     <div class="flex flex-[0_0_0] h-30 pb-8">

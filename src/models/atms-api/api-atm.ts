@@ -2,7 +2,7 @@ import type { ATM } from '../atm/atm'
 
 // Mockup interface to be used with BBVA atm API
 export interface ApiATM {
-  IdPunto?: number
+  IdPunto?: string
   IdCatalogo?: number
   Nombre?: string
   NombreLugar?: string

@@ -2,12 +2,13 @@ import {
   FirebaseApp,
   FirebaseAppSettings,
   FirebaseOptions,
-  initializeApp
+  initializeApp,
 } from 'firebase/app'
 import {
   collection,
   CollectionReference,
-  doc, Firestore,
+  doc,
+  Firestore,
   getDoc,
   getDocs,
   getFirestore,
@@ -16,7 +17,7 @@ import {
   query,
   QuerySnapshot,
   setDoc,
-  where
+  where,
 } from 'firebase/firestore'
 import { ATMUserReport } from '../models/atm-user-report'
 
@@ -54,7 +55,7 @@ export default class FirestoreService {
     return docs.docs
   }
 
-  async getAllReportsForAtm(atmID: number) {
+  async getAllReportsForAtm(atmID: number | string) {
     const reportsInAtmQuery = query(
       this.userReportsCollection,
       where('atmID', '==', atmID),
@@ -98,7 +99,7 @@ export default class FirestoreService {
   }
 
   setOnReportsUpdate(
-    atmID: number,
+    atmID: number | string,
     // eslint-disable-next-line no-unused-vars
     onNext: (snapshot: QuerySnapshot<ATMUserReport>) => void
   ) {

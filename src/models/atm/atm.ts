@@ -1,11 +1,11 @@
 // Interface we'll use with csv files
 export interface ATM {
-  id?: number
+  id?: string
   sitio?: string
   // ¿Código de región?
   cr?: number
   division?: string
-  marca?: number
+  marca?: string
   tipoDispositivo?: string
   estatus?: string
   calle?: string
