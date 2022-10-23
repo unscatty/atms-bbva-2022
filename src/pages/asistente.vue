@@ -408,6 +408,7 @@ const addUserMessage = (message: ChatbotUserMessage) => {
             <!-- Sterring wheel icon -->
             <div
               class="i-mdi-steering text-2xl"
+              :class="isStreaming ? 'text-[#30C5FF]' : ''"
               group-hover="scale-110"
               transition="ease-in-out duration-250"
               @click="toggleStreamingAudio"
