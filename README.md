@@ -1,4 +1,4 @@
-![alt text]()
+![Logo de proyecto](https://github.com/unscatty/atms-bbva-2022/blob/master/presentacionAssets/192x192.png)
 
 # ATM Easy Finder
 
@@ -11,6 +11,7 @@ ATM Easy Finder es una web app enfocada al tiempo y experiencia del usuario. En 
 - [Video](#Video)
 - [Servicios](#Servicios)
 - [Tecnologías](#Tecnologías)
+- [Arquitectura](#Arquitectura)
 - [Screenshots](#Screenshots)
 - [Autores](#Autores)
 - [Quick start](#Quick-start)
@@ -19,7 +20,28 @@ ATM Easy Finder es una web app enfocada al tiempo y experiencia del usuario. En 
 
 # Servicios
 
+- :atm: Ver cajeros cercanos y como llegar
+- :robot: Chatbot con la funcionalidad de asistente de voz
+- :warning: Alertas en tiempo real
+- :raising_hand: Crear alertas y sugerencias
+- :star: Una mejor experiencia de usuario
+
 # Tecnologías
+
+- Typescript / Javascript
+- Vue
+- Google Maps Javascript API
+- Firebase Firestore
+- Firebase Hosting
+- Socket.io
+- Express.js
+- Google Cloud BigQuery
+- Google Cloud Dialogflow CX
+- Google Cloud App Engine Flex
+
+# Arquitectura
+
+![Arquitectura de proyecto](https://github.com/unscatty/atms-bbva-2022/blob/master/presentacionAssets/Arquitectura_page-0001.jpg)
 
 # Screenshots
 
