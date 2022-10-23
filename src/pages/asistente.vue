@@ -34,6 +34,12 @@ const messagesPanelRef = ref<HTMLElement>()
 
 onMounted(() => {
   getLocation()
+
+  createBotReplies([{
+    text: {
+      text: ['¡Hola! Soy el asistente de ATMs de BBVA, puedo ayudarte a buscar un cajero cerca de donde estés.']
+    }
+  }])
 })
 
 // Auto scroll messages
