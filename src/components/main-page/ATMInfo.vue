@@ -14,7 +14,12 @@ const props = defineProps<{ atm: ATM }>()
 const atmAlerts = ref<{ id: string; data: ATMUserReport }[]>([])
 const unsuscribe = ref<Unsubscribe>()
 
-const newReportKind = ref<ATMUserReportKind>(ATMUserReportKind.NOT_WORKING)
+const defaultInitialUserReport = {
+  atmID: props.atm.id!,
+  kind: ATMUserReportKind.NOT_WORKING,
+}
+
+const newReport = ref<Partial<ATMUserReport>>({ ...defaultInitialUserReport })
 
 onMounted(async () => {
   // Get the alerts for this atm
@@ -54,6 +59,10 @@ const emit = defineEmits<{
   ): void
 }>()
 
+const upvoteReport = async (reportID: string) => {
+  await alertService.upvoteUserReport(reportID)
+}
+
 const travelButtons: Array<{
   mode: keyof typeof google.maps.TravelMode
   icon: string
@@ -78,11 +87,31 @@ const travelButtons: Array<{
 // const emit = defineEmits(['close'])
 const isAlertModalOpen = ref(false)
 
-const createAlert = () => {
+const openCreateAlertModal = async () => {
   isAlertModalOpen.value = true
 }
 
-const closeAlert = () => {
+const createAlert = async () => {
+  if (
+    newReport.value.kind === ATMUserReportKind.OTHER &&
+    !newReport.value.description
+  ) {
+    // You have to put a description for kind 'OTHER'
+    alert(
+      'Por favor agrega una descripción para informar a los demás de la situación'
+    )
+    return
+  }
+
+  isAlertModalOpen.value = false
+
+  await alertService.addUserReport(newReport.value)
+
+  newReport.value.description = ''
+  newReport.value.kind = ATMUserReportKind.NOT_WORKING
+}
+
+const closeCreateAlertModal = () => {
   isAlertModalOpen.value = false
 }
 </script>
@@ -103,10 +132,12 @@ const closeAlert = () => {
         {{ atm.sitio }}
       </div>
       <div class="pb-4">
-        <label for="location" class="block text-sm font-medium text-gray-700"
+        <label
+          for="location"
+          class="block text-sm font-medium text-gray-700 pb-2"
           >Tipo</label
         >
-        <div class="space-y-4">
+        <div class="space-y-2">
           <div
             v-for="reportKind in Object.values(ATMUserReportKind)"
             :key="reportKind"
@@ -114,7 +145,7 @@ const closeAlert = () => {
           >
             <input
               :id="reportKind"
-              v-model="newReportKind"
+              v-model="newReport.kind"
               name="notification-method"
               type="radio"
               :value="reportKind"
@@ -137,6 +168,7 @@ const closeAlert = () => {
         <div class="mt-1">
           <textarea
             id="comment"
+            v-model="newReport.description"
             rows="4"
             name="comment"
             class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2"
@@ -147,13 +179,14 @@ const closeAlert = () => {
         <button
           type="button"
           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          @click="closeAlert"
+          @click="closeCreateAlertModal"
         >
           Cancelar
         </button>
         <button
           type="button"
           class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          @click="createAlert"
         >
           Crear Alerta
         </button>
@@ -242,10 +275,10 @@ const closeAlert = () => {
             class="py-2 border-t border-b flex justify-between px-2 border-gray"
           >
             <p class="text-black">Alertas</p>
-            <div
-              class="i-heroicons-plus-circle-20-solid"
-              :onClick="createAlert"
-            ></div>
+            <button
+              class="i-heroicons-plus-circle-20-solid text-xl"
+              :onClick="openCreateAlertModal"
+            ></button>
           </div>
         </div>
       </div>
@@ -253,7 +286,7 @@ const closeAlert = () => {
 
     <div class="flex-1 overflow-y-scroll px-8 pb-4 grid gap-4 scrollbarHidden">
       <div v-for="alert in atmAlerts" :key="alert.id">
-        <Alert :alert="alert.data" />
+        <Alert :alert="alert.data" @upvote="upvoteReport(alert.id)" />
       </div>
     </div>
 

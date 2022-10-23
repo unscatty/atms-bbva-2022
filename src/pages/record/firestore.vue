@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Timestamp } from 'firebase/firestore';
 import { defaultFirestoreService as firestoreService } from '~/services/firestore.service'
 import { ATMUserReport, ATMUserReportKind } from '../../models/atm-user-report'
 
@@ -47,7 +48,7 @@ const createAlert = async () => {
     atmID: '5202',
     description: 'no hay varo',
     kind: ATMUserReportKind.NO_CASH,
-    timestamp: new Date(),
+    timestamp: Timestamp.now(),
     upvotes: 2,
   })
 }

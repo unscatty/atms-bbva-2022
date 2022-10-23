@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore"
+
 /* eslint-disable no-unused-vars */
 export enum ATMUserReportKind {
   NO_CASH = 'NO_CASH',
@@ -11,7 +13,7 @@ export interface ATMUserReport {
   kind: ATMUserReportKind
   description: string
   upvotes: number
-  timestamp: Date
+  timestamp: Timestamp
 }
 
 export const generateDescriptionTitle = (alertKind: ATMUserReportKind) => {

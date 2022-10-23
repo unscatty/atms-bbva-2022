@@ -17,6 +17,7 @@ import {
   query,
   QuerySnapshot,
   setDoc,
+  Timestamp,
   where,
 } from 'firebase/firestore'
 import { ATMUserReport } from '../models/atm-user-report'
@@ -70,7 +71,9 @@ export default class FirestoreService {
     return docs.docs
   }
 
-  async addUserReport(report: ATMUserReport) {
+  async addUserReport(report: Partial<ATMUserReport>) {
+    report.timestamp = Timestamp.now()
+    report.upvotes = 0
     // Document id gets generated automatically
     return setDoc(doc(this.userReportsCollection), report)
   }
