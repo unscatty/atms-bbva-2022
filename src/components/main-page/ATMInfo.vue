@@ -1,9 +1,44 @@
 <!-- eslint-disable no-unused-vars -->
 <script setup lang="ts">
-import { ATM, generateDescriptions } from '~/models/atm/atm'
-import { ref } from 'vue'
+import { Unsubscribe } from 'firebase/firestore'
+import { ATM } from '~/models/atm/atm'
+import { defaultFirestoreService as alertService } from '~/services/firestore.service'
+import { ATMUserReport } from '~/models/atm-user-report'
 
-defineProps<{ atm: ATM }>()
+const props = defineProps<{ atm: ATM }>()
+
+const atmAlerts = ref<{ id: string; data: ATMUserReport }[]>([])
+const unsuscribe = ref<Unsubscribe>()
+
+onMounted(async () => {
+  // Get the alerts for this atm
+  const snapshot = await alertService.getAllReportsForAtm(props.atm.id!)
+  atmAlerts.value = snapshot.map((doc) => {
+    return {
+      id: doc.id,
+      data: doc.data(),
+    }
+  })
+
+  // Set listener for new alerts for this atm
+  unsuscribe.value = alertService.setOnReportsUpdate(
+    props.atm.id!,
+    (snapshot) => {
+      atmAlerts.value = snapshot.docs.map((doc) => {
+        return {
+          id: doc.id,
+          data: doc.data(),
+        }
+      })
+    }
+  )
+})
+
+onUnmounted(() => {
+  if (unsuscribe.value) {
+    unsuscribe.value()
+  }
+})
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -35,20 +70,20 @@ const travelButtons: Array<{
   },
 ]
 // const emit = defineEmits(['close'])
-const alert = ref(false)
+const isAlertModalOpen = ref(false)
 
 const createAlert = () => {
-  alert.value = true
+  isAlertModalOpen.value = true
 }
 
 const closeAlert = () => {
-  alert.value = false
+  isAlertModalOpen.value = false
 }
 </script>
 
 <template>
   <div
-    v-show="alert"
+    v-show="isAlertModalOpen"
     class="fixed top-0 left-0 w-100vw h-100vh bg-[#c9c4c4c4] z-100000 rounded p-4"
   >
     <div
@@ -205,10 +240,10 @@ const closeAlert = () => {
       </div>
     </div>
 
-    <div
-      class="flex flex-col flex-1 overflow-y-scroll px-8 pb-4 grid gap-4 scrollbarHidden"
-    >
-      <Alert />
+    <div class="flex-1 overflow-y-scroll px-8 pb-4 grid gap-4 scrollbarHidden">
+      <div v-for="alert in atmAlerts" :key="alert.id">
+        <Alert :alert="alert.data" />
+      </div>
     </div>
 
     <div class="flex flex-[0_0_0] h-30 pb-8">
@@ -223,4 +258,4 @@ const closeAlert = () => {
   </div>
 </template>
 
-function ref(arg0: boolean) { throw new Error('Function not implemented.') }
+<!-- function ref(arg0: boolean) { throw new Error('Function not implemented.') } -->

@@ -15,7 +15,7 @@ onMounted(async () => {
   //   })
   // })
 
-  const snapshot = await firestoreService.getAllReportsForAtm(1)
+  const snapshot = await firestoreService.getAllReportsForAtm('5202')
   reports.value = snapshot.map((doc) => {
     // console.log(doc.data(), doc.id)
     return {
@@ -24,14 +24,14 @@ onMounted(async () => {
     }
   })
 
-  firestoreService.setOnReportsUpdate(1, (snapshot) => {
-    reports.value = snapshot.docs.map((doc) => {
-      return {
-        id: doc.id,
-        data: doc.data(),
-      }
-    })
-  })
+  // firestoreService.setOnReportsUpdate(5202, (snapshot) => {
+  //   reports.value = snapshot.docs.map((doc) => {
+  //     return {
+  //       id: doc.id,
+  //       data: doc.data(),
+  //     }
+  //   })
+  // })
 })
 
 const upvote = async (reportID: string) => {
@@ -40,6 +40,16 @@ const upvote = async (reportID: string) => {
 
 const downvote = async (reportID: string) => {
   await firestoreService.downvoteUserReport(reportID)
+}
+
+const createAlert = async () => {
+  await firestoreService.addUserReport({
+    atmID: '5202',
+    description: 'no hay varo',
+    kind: ATMUserReportKind.NO_CASH,
+    timestamp: new Date(),
+    upvotes: 2,
+  })
 }
 </script>
 
@@ -58,6 +68,7 @@ const downvote = async (reportID: string) => {
       </li>
     </ul>
   </div>
+  <button class="btn" @click="createAlert">Create report</button>
 </template>
 
 <style scoped></style>
