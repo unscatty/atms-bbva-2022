@@ -1,9 +1,11 @@
 <!-- eslint-disable no-unused-vars -->
 <script setup lang="ts">
 import { ATM, generateDescriptions } from '~/models/atm/atm'
+import { ref } from 'vue'
 
 defineProps<{ atm: ATM }>()
 
+<<<<<<< Updated upstream
 const emit = defineEmits<{
   (e: 'close'): void
   (
@@ -33,9 +35,89 @@ const travelButtons: Array<{
     icon: 'i-mdi:bicycle',
   },
 ]
+=======
+const emit = defineEmits(['close'])
+const alert = ref(false)
+
+const createAlert = () => {
+  alert.value = true
+}
+
+const closeAlert = () => {
+  alert.value = false
+}
+>>>>>>> Stashed changes
 </script>
 
 <template>
+  <div
+    v-show="alert"
+    class="fixed top-0 left-0 w-100vw h-100vh bg-[#c9c4c4c4] z-100000 rounded p-4"
+  >
+    <div
+      class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-auto bg-neutral-100 z-100000 rounded p-4"
+    >
+      <h1 class="text-1xl pb-2 border-b-2 mb-2">Nueva alerta</h1>
+      <div class="pb-4">
+        <label for="location" class="block text-sm font-medium text-gray-700"
+          >Cajero</label
+        >
+        <select
+          id="location"
+          name="location"
+          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        >
+          <option selected="">{{ atm.sitio }}</option>
+        </select>
+      </div>
+      <div class="pb-4">
+        <label for="location" class="block text-sm font-medium text-gray-700"
+          >Tipo</label
+        >
+        <select
+          id="location"
+          name="location"
+          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        >
+          <option selected="" value="Sugerencia" class="text-black">
+            Sugerencia
+          </option>
+          <option selected="" value="Advertencia" class="text-black">
+            Advertencia
+          </option>
+        </select>
+      </div>
+      <div pb-4>
+        <label for="comment" class="block text-sm font-medium text-gray-700"
+          >Agrega tu alerta</label
+        >
+        <div class="mt-1">
+          <textarea
+            rows="4"
+            name="comment"
+            id="comment"
+            class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2"
+          />
+        </div>
+      </div>
+      <div class="flex justify-end gap-4">
+        <button
+          @click="closeAlert"
+          type="button"
+          class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Crear Alerta
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="flex flex-col heightWithoutNavbar gap-8">
     <div class="flex-[0_0_0]">
       <div class="">
@@ -117,13 +199,16 @@ const travelButtons: Array<{
             class="py-2 border-t border-b flex justify-between px-2 border-gray"
           >
             <p class="text-black">Alertas</p>
-            <button class="text-black text-center">+</button>
+            <div
+              class="i-heroicons-plus-circle-20-solid"
+              :onClick="createAlert"
+            ></div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="flex-1 overflow-y-scroll px-8 pb-4 grid gap-4 scrollbarHidden">
+    <div class="flex flex-col flex-1 overflow-y-scroll px-8 pb-4 grid gap-4 scrollbarHidden">
       <Alert />
     </div>
 
@@ -138,3 +223,5 @@ const travelButtons: Array<{
     </div>
   </div>
 </template>
+
+function ref(arg0: boolean) { throw new Error('Function not implemented.') }

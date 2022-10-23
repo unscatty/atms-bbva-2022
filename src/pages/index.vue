@@ -137,6 +137,16 @@ watch(
 </script>
 
 <template>
+  <div class="bakcground">
+    <div class="container">
+      <div>
+        <img class="aIntro" src="../assets/img/A.svg" alt="" />
+      </div>
+      <div>
+        <img class="bbvIntro" src="../assets/img/BBV.svg" alt="" />
+      </div>
+    </div>
+  </div>
   <FlyoutMenu
     :is-home-page="true"
     @nearby-atms="getNearATMs(center)"
