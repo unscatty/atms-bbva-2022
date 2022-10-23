@@ -25,13 +25,13 @@ const navigationResources = [
   {
     name: 'Asistente ATM',
     to: '/asistente',
-    icon: 'i-heroicons-chat-bubble-bottom-center-text-20-solid',
+    icon: 'i-bxs-bot',
   },
 ]
 </script>
 
 <template>
-  <Popover v-slot="{ open }" class="z-9999 relative">
+  <Popover v-slot="{ open }" class="z-1 relative">
     <div class="relative z-10 bg-white shadow">
       <div class="max-w-7xl mx-auto flex px-4 py-4 sm:px-6 lg:px-8">
         <PopoverButton

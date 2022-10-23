@@ -1,12 +1,38 @@
+<!-- eslint-disable no-unused-vars -->
 <script setup lang="ts">
 import { ATM, generateDescriptions } from '~/models/atm/atm'
 
-
-
 defineProps<{ atm: ATM }>()
 
+const emit = defineEmits<{
+  (e: 'close'): void
+  (
+    e: 'select-travel-mode',
+    travelMode: keyof typeof google.maps.TravelMode
+  ): void
+}>()
 
-
+const travelButtons: Array<{
+  mode: keyof typeof google.maps.TravelMode
+  icon: string
+}> = [
+  {
+    mode: 'WALKING',
+    icon: 'i-mdi:walk',
+  },
+  {
+    mode: 'DRIVING',
+    icon: 'i-mdi:car',
+  },
+  {
+    mode: 'TRANSIT',
+    icon: 'i-mdi:bus',
+  },
+  {
+    mode: 'BICYCLING',
+    icon: 'i-mdi:bicycle',
+  },
+]
 </script>
 
 <template>
@@ -35,7 +61,7 @@ defineProps<{ atm: ATM }>()
         <div class="flex-auto gap-4 grid">
           <div class="flex gap-2">
             <span
-              class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-600 text-white-800"
+              class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-600 text-light"
             >
               ACTIVO
             </span>
@@ -72,31 +98,19 @@ defineProps<{ atm: ATM }>()
             </div>
           </div>
 
-          <div class="flex gap-2">
-            <div
-              class="flex-1 text-black flex items-center rounded p-2 justify-center bg-light-blue-200"
+          <div class="py-1 border-y flex justify-between px-2 border-gray">
+            <p class="text-black">Rutas</p>
+          </div>
+          <div class="flex justify-between w-full">
+            <button
+              v-for="travelButton in travelButtons"
+              :key="travelButton.mode"
+              type="button"
+              class="inline-flex items-center px-6 py-1 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-700 hover:bg-blue-800 hover:outline-none hover:ring-2 hover:ring-offset-2 hover:ring-blue-600"
+              @click="emit('select-travel-mode', travelButton.mode)"
             >
-              <div class="i-mdi:walk"> 
-
-              </div>
-            </div>
-            <div
-              class="flex-1 text-black flex items-center rounded justify-center bg-light-blue-200"
-            >
-              <div class="i-mdi:car">
-
-              </div>
-            </div>
-            <div
-              class="flex-1 text-black flex items-center rounded justify-center bg-light-blue-200"
-            >
-              <div class="i-mdi:bus"></div>
-            </div>
-            <div
-              class="flex-1 text-black flex items-center rounded justify-center bg-light-blue-200"
-            >
-              <div class="i-mdi:bicycle"></div>
-            </div>
+              <div :class="travelButton.icon"></div>
+            </button>
           </div>
 
           <div
@@ -117,7 +131,7 @@ defineProps<{ atm: ATM }>()
       <button
         type="button"
         class="flex-auto rounded-md border border-transparent bg-indigo-600 py-2 mx-8 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        @click="$parent.$emit('close')"
+        @click="emit('close')"
       >
         OK
       </button>

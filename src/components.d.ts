@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Alert: typeof import('./components/Alert.vue')['default']
     ATMInfo: typeof import('./components/main-page/ATMInfo.vue')['default']
+    ChatbotImageModal: typeof import('./components/chatbot/main/ChatbotImageModal.vue')['default']
     Counter: typeof import('./components/Counter.vue')['default']
     FlyoutMenu: typeof import('./components/main-page/FlyoutMenu.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
