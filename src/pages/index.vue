@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GoogleMap, Marker, CustomMarker } from 'vue3-google-map'
+import { GoogleMap, CustomMarker } from 'vue3-google-map'
 import type { ATM } from '~/models/atm/atm'
 import { atmToLatLngLiteral } from '~/models/atm/atm'
 // import atmService from '~/services/atms/api/api-atm.service'
@@ -82,12 +82,18 @@ const getNearATMs = async (location: google.maps.LatLngLiteral) => {
   gmaps.value?.map?.panToBounds(bounds)
 }
 
-const getRoute = async () => {
+const getRouteToATM = async (
+  travelModeString: keyof typeof google.maps.TravelMode
+) => {
+  if (!selectedATM.value) return
+
+  const travelMode = google.maps.TravelMode[travelModeString]
+
   await directionsServices.route(
     {
       origin: center.value,
-      destination: atmToLatLngLiteral(atmLocations.value[0]),
-      travelMode: google.maps.TravelMode.DRIVING,
+      destination: atmToLatLngLiteral(selectedATM.value),
+      travelMode: travelMode,
       unitSystem: google.maps.UnitSystem.METRIC,
     },
     function (result, status) {
@@ -96,6 +102,8 @@ const getRoute = async () => {
       }
     }
   )
+
+  closeATMInfo()
 }
 
 const showATMInfo = (atm: ATM) => {
@@ -172,7 +180,11 @@ watch(
       :show="modalOpen"
       @close="closeATMInfo"
     >
-      <ATMInfo :atm="selectedATM!" @close="closeATMInfo" />
+      <ATMInfo
+        :atm="selectedATM!"
+        @close="closeATMInfo"
+        @select-travel-mode="getRouteToATM"
+      />
     </InfoDialog>
   </GoogleMap>
 </template>
